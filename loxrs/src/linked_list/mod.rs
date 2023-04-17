@@ -1,14 +1,15 @@
 
+type NodePtr<T> = Option<Box<Node<T>>>;
+
 struct Node<T> {
     value: T,
-    next: Option<Box<Node<T>>>,
-    prev: Option<Box<Node<T>>>,
+    next: NodePtr<T>,
+    prev: NodePtr<T>,
 }
 
-
 pub struct LinkedList<T> {
-    head: Option<Box<Node<T>>>,
-    tail: Option<Box<Node<T>>>,
+    head: NodePtr<T>,
+    tail: NodePtr<T>,
     length: usize,
 }
 
