@@ -1,51 +1,67 @@
-use std::borrow::BorrowMut;
-use std::cell::Cell;
+use std::borrow::{BorrowMut, Borrow};
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-type NodePtr<T> = Option<Rc<Cell<Node<T>>>>;
-
-struct Node<T> {
-    value: T,
-    next: NodePtr<T>,
-    prev: NodePtr<T>,
-}
+type NodePtr<T> = Option<Box<Node<T>>>;
 
 pub struct LinkedList<T> {
-    head: NodePtr<T>,
-    tail: NodePtr<T>,
+    head: Link<T>,
     length: usize,
+}
+
+#[derive(Debug)]
+enum Link<T> {
+    Empty,
+    More(Box<Node<T>>),
+}
+
+#[derive(Debug)]
+struct Node<T> {
+    value: T,
+    next: Link<T>,
 }
 
 impl<T> LinkedList<T> {
     pub fn new() -> Self {
         Self {
-            head: None,
-            tail: None,
+            head: Link::Empty,
             length: 0,
         }
     }
 
     pub fn push(&mut self, value: T) {
-        let mut new_node = Rc::new(Cell::new(Node {
-                    value,
-                    next: None,
-                    prev: None,
-                }));
+        let new_node = Box::new(Node {
+            value,
+            next: Link::Empty,
+        });
 
-        match self.tail {
-            Some(ref _old_tail ) => {
-                todo!();
-                // new_node.get_mut().prev = Some(Rc::clone(&old_tail));
-                // old_tail.next = Some(Rc::clone(&new_node));
-                // self.tail = Some(Rc::clone(&new_node));
-            },
-            None => {
-                self.head = Some(Rc::clone(&new_node));
-                self.tail = Some(Rc::clone(&new_node));
-            },
+        match self.head {
+            Link::Empty => self.head = Link::More(new_node),
+            Link::More(ref mut node) => {
+                node.next = Link::More(new_node);
+            }
         }
 
         self.length += 1;
+    }
+
+       fn get(&self, i: usize) -> Option<&T> where T: std::fmt::Debug  {
+        self.head.get(i)
+    }
+}
+
+impl<T> Link<T> {
+    fn get(&self, i: usize) -> Option<&T> where T: std::fmt::Debug {
+        println!("self: {:?} / i: {}", self, i);
+        if let Link::More(ref node) = self {
+            if i == 0 {
+                Some(&node.value)
+            } else {
+                node.next.get(i - 1)
+            }
+        } else {
+            None
+        }
     }
 }
 
