@@ -45,9 +45,25 @@ where T: Debug + PartialEq {
         self.length += 1;
     }
 
-    fn get(&self, i: usize) -> Option<&T> {
+    pub fn get(&self, i: usize) -> Option<&T> {
         self.head.get(i)
     }
+
+    pub fn find(&self, value: T) -> Option<usize> where T: PartialEq {
+        let mut cursor = 0;
+        let mut current = &self.head;
+
+        while let Link::More(node) = current {
+            if node.value == value {
+                return Some(cursor);
+            }
+            current = &node.next;
+            cursor += 1;
+        }
+
+        None
+    }
+
 }
 
 impl<T> Link<T> {
