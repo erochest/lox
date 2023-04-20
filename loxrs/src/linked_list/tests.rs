@@ -61,7 +61,14 @@ fn when_find_returns_none_then_the_item_is_not_in_the_list() {
     assert_eq!(list.find(3), None);
 }
 
-// TODO: find
+#[test]
+fn when_find_returns_some_then_the_item_is_in_the_list() {
+    let mut list: LinkedList<usize> = LinkedList::new();
+    list.push(1);
+    list.push(2);
+    assert_eq!(list.find(2), Some(1));
+}
+
 // TODO: prepend
 // TODO: insert after
 // TODO: insert before
