@@ -25,9 +25,13 @@ fn when_pushing_multiple_items_then_the_list_is_not_empty() {
     assert_eq!(list.is_empty(), false);
 }
 
-#[ignore = "why not"]
 #[test]
 fn when_pushing_the_list_grows() {
+    let mut list = LinkedList::<i32>::new();
+    list.push(1);
+    list.push(2);
+    list.push(3);
+    assert_eq!(list.length, 3);
 }
 
 
