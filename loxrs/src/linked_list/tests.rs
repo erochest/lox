@@ -9,9 +9,11 @@ fn when_constructing_a_linked_list_then_the_list_is_empty() {
     assert_eq!(list.is_empty(), true);
 }
 
-#[ignore = "why not"]
 #[test]
 fn when_pushing_an_item_then_the_list_is_not_empty() {
+    let mut list = LinkedList::<i32>::new();
+    list.push(1);
+    assert_eq!(list.is_empty(), false);
 }
 
 #[ignore = "why not"]
