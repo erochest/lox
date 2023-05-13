@@ -34,7 +34,6 @@ fn when_pushing_the_list_grows() {
     assert_eq!(list.length, 3);
 }
 
-
 #[test]
 fn when_popping_an_item_then_the_item_is_returned() {
     let mut list = LinkedList::<i32>::new();
@@ -45,24 +44,3 @@ fn when_popping_an_item_then_the_item_is_returned() {
     assert_eq!(list.pop(), Some(2));
     assert_eq!(list.pop(), Some(1));
 }
-
-#[ignore = "why not"]
-#[test]
-fn when_find_returns_none_then_the_item_is_not_in_the_list() {
-}
-
-#[ignore = "why not"]
-#[test]
-fn when_find_returns_some_then_the_item_is_in_the_list() {
-}
-
-#[ignore = "why not"]
-fn when_prepend_on_empty_list_then_the_list_is_not_empty() {
-}
-
-// TODO: prepend on not empty list
-// TODO: insert after
-// TODO: insert before
-// TODO: delete
-// TODO: pop
-// TODO: pop-head

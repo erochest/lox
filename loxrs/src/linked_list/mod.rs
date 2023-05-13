@@ -34,22 +34,6 @@ impl<T> LinkedList<T> {
         self.length += 1;
     }
 
-    pub fn prepend(&mut self, item: T) {
-        unimplemented!()
-    }
-
-    pub fn insert_after(&mut self, item: T) {
-        unimplemented!()
-    }
-
-    pub fn insert_before(&mut self, item: T) {
-        unimplemented!()
-    }
-
-    pub fn delete(&mut self, item: T) {
-        unimplemented!()
-    }
-
     pub fn pop(&mut self) -> Option<T> {
         self.head.take().map(|node| {
             self.head = node.borrow_mut().next.take();
@@ -58,13 +42,6 @@ impl<T> LinkedList<T> {
         })
     }
 
-    pub fn pop_head(&mut self) -> Option<T> {
-        unimplemented!()
-    }
-
-    pub fn find(&self, item: T) -> Option<T> {
-        unimplemented!()
-    }
 }
 #[cfg(test)]
 mod tests;
