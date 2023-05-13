@@ -1,127 +1,48 @@
-use std::borrow::{BorrowMut, Borrow};
-use std::cell::{Cell, RefCell};
-use std::rc::Rc;
-use std::fmt::Debug;
-
-type NodePtr<T> = Option<Box<Node<T>>>;
 
 pub struct LinkedList<T> {
-    head: Link<T>,
-    length: usize,
+    phantom: std::marker::PhantomData<T>,
 }
 
-#[derive(Debug, PartialEq)]
-enum Link<T> {
-    Empty,
-    More(Box<Node<T>>),
-}
-
-#[derive(Debug, PartialEq)]
-struct Node<T> {
-    value: T,
-    next: Link<T>,
-}
-
-impl<T> LinkedList<T>
-where T: Debug + PartialEq {
+impl<T> LinkedList<T> {
     pub fn new() -> Self {
-        Self {
-            head: Link::Empty,
-            length: 0,
-        }
+        LinkedList { phantom: std::marker::PhantomData }
     }
 
-    pub fn push(&mut self, value: T) {
-        let new_node = Box::new(Node {
-            value,
-            next: Link::Empty,
-        });
-
-        match self.head.last_mut() {
-            Some(node) => node.next = Link::More(new_node),
-            None => self.head = Link::More(new_node),
-        }
-
-        self.length += 1;
+    pub fn is_empty(&self) -> bool {
+        true
     }
 
-    pub fn get(&self, i: usize) -> Option<&T> {
-        self.head.get(i)
+    pub fn push(&mut self, item: T) {
+        unimplemented!()
     }
 
-    pub fn find(&self, value: T) -> Option<usize> where T: PartialEq {
-        let mut cursor = 0;
-        let mut current = &self.head;
-
-        while let Link::More(node) = current {
-            if node.value == value {
-                return Some(cursor);
-            }
-            current = &node.next;
-            cursor += 1;
-        }
-
-        None
+    pub fn prepend(&mut self, item: T) {
+        unimplemented!()
     }
 
-}
-
-impl<T> Link<T> {
-    fn get(&self, i: usize) -> Option<&T> where T: std::fmt::Debug {
-        // println!("self: {:?} / i: {}", self, i);
-        if let Link::More(ref node) = self {
-            if i == 0 {
-                Some(&node.value)
-            } else {
-                node.next.get(i - 1)
-            }
-        } else {
-            None
-        }
+    pub fn insert_after(&mut self, item: T) {
+        unimplemented!()
     }
 
-    fn tail(&self) -> Option<&Link<T>> {
-        if let Link::More(ref node) = self {
-            Some(&node.next)
-        } else {
-            None
-        }
+    pub fn insert_before(&mut self, item: T) {
+        unimplemented!()
     }
 
-    fn last(&self) -> Option<&Node<T>> {
-        if let Link::More(ref node) = self {
-            node.last()
-        } else {
-            None
-        }
+    pub fn delete(&mut self, item: T) {
+        unimplemented!()
     }
 
-    fn last_mut(&mut self) -> Option<&mut Node<T>> {
-        if let Link::More(ref mut node) = self {
-            node.last_mut()
-        } else {
-            None
-        }
+    pub fn pop(&mut self) -> Option<T> {
+        unimplemented!()
+    }
+
+    pub fn pop_head(&mut self) -> Option<T> {
+        unimplemented!()
+    }
+
+    pub fn find(&self, item: T) -> Option<T> {
+        unimplemented!()
     }
 }
-
-impl<T> Node<T> {
-    fn last(&self) -> Option<&Node<T>> {
-        if let Link::More(ref node) = self.next {
-            node.last()
-        } else {
-            Some(self)
-        }
-    }
-
-    fn last_mut(&mut self) -> Option<&mut Node<T>> {
-        if let Link::More(ref mut node) = self.next {
-            node.last_mut()
-        } else {
-            Some(self)
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests;
