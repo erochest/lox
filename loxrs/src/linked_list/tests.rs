@@ -35,9 +35,15 @@ fn when_pushing_the_list_grows() {
 }
 
 
-#[ignore = "why not"]
 #[test]
-fn when_getting_an_item_then_the_item_is_returned() {
+fn when_popping_an_item_then_the_item_is_returned() {
+    let mut list = LinkedList::<i32>::new();
+    list.push(1);
+    list.push(2);
+    list.push(3);
+    assert_eq!(list.pop(), Some(3));
+    assert_eq!(list.pop(), Some(2));
+    assert_eq!(list.pop(), Some(1));
 }
 
 #[ignore = "why not"]

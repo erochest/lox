@@ -10,7 +10,6 @@ struct Node<T> {
 
 pub struct LinkedList<T> {
     head: Link<T>,
-    tail: Link<T>,
     length: usize,
 }
 
@@ -18,7 +17,6 @@ impl<T> LinkedList<T> {
     pub fn new() -> Self {
         LinkedList {
             head: None,
-            tail: None,
             length: 0,
         }
     }
@@ -30,20 +28,9 @@ impl<T> LinkedList<T> {
     pub fn push(&mut self, item: T) {
         let new_node = Rc::new(RefCell::new(Node {
             item,
-            next: None,
+            next: self.head.take(),
         }));
-
-        match self.tail.take() {
-            Some(old_tail) => {
-                old_tail.borrow_mut().next = Some(new_node.clone());
-                self.tail = Some(new_node);
-            }
-            None => {
-                self.head = Some(new_node.clone());
-                self.tail = Some(new_node);
-            }
-        }
-
+        self.head = Some(new_node);
         self.length += 1;
     }
 
@@ -64,7 +51,11 @@ impl<T> LinkedList<T> {
     }
 
     pub fn pop(&mut self) -> Option<T> {
-        unimplemented!()
+        self.head.take().map(|node| {
+            self.head = node.borrow_mut().next.take();
+            self.length -= 1;
+            Rc::try_unwrap(node).ok().unwrap().into_inner().item
+        })
     }
 
     pub fn pop_head(&mut self) -> Option<T> {
