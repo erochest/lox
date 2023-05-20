@@ -56,5 +56,3 @@ fn when_append_then_the_list_grows() {
     assert_eq!(list.pop(), Some(2));
     assert_eq!(list.pop(), Some(3));
 }
-
-// TODO impl Drop

@@ -84,5 +84,12 @@ impl<T> LinkedList<T> {
         self.length += 1;
     }
 }
+
+impl<T> Drop for LinkedList<T> {
+    fn drop(&mut self) {
+        while let Some(_) = self.pop() {}
+    }
+}
+
 #[cfg(test)]
 mod tests;
