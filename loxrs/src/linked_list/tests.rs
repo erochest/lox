@@ -44,3 +44,17 @@ fn when_popping_an_item_then_the_item_is_returned() {
     assert_eq!(list.pop(), Some(2));
     assert_eq!(list.pop(), Some(1));
 }
+
+#[test]
+fn when_append_then_the_list_grows() {
+    let mut list = LinkedList::<i32>::new();
+    list.append(1);
+    list.append(2);
+    list.append(3);
+    assert_eq!(list.length, 3);
+    assert_eq!(list.pop(), Some(1));
+    assert_eq!(list.pop(), Some(2));
+    assert_eq!(list.pop(), Some(3));
+}
+
+// TODO impl Drop
