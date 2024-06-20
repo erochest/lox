@@ -3,12 +3,46 @@
  */
 package klox.app
 
-import klox.utilities.StringUtils
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.charset.StandardCharsets
 
-import org.apache.commons.text.WordUtils
+fun main(args: Array<String>) {
+    if (args.size > 1) {
+        println("Usage: klox [script]")
+        System.exit(64)
+    } else if (args.size == 1) {
+        runFile(args[0])
+    } else {
+        runPrompt()
+    }
+}
 
-fun main() {
-    val tokens = StringUtils.split(MessageUtils.getMessage())
-    val result = StringUtils.join(tokens)
-    println(WordUtils.capitalize(result))
+private fun runFile(path: String) {
+    val bytes = Files.readAllBytes(Paths.get(path))
+    val source = String(bytes, StandardCharsets.UTF_8)
+    run(source)
+}
+
+private fun runPrompt() {
+    val reader = BufferedReader(InputStreamReader(System.`in`))
+
+    while (true) {
+        print("> ")
+        val line = reader.readLine()
+        if (line == null) break
+        run(line)
+    }
+}
+
+private fun run(source: String) {
+    val scanner = Scanner(source)
+    val tokens = scanner.scanTokens()
+
+    for (token in tokens) {
+        println(token.toString())
+    }
 }
