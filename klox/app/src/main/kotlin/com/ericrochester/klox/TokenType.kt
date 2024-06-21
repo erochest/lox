@@ -1,4 +1,4 @@
-package klox
+package com.ericrochester.klox
 
 enum class TokenType {
     // Single-character tokens.

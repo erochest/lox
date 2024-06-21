@@ -1,4 +1,4 @@
-package klox
+package com.ericrochester.klox
 
 class Token(
     val type: TokenType,

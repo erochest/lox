@@ -1,6 +1,6 @@
-package klox
+package com.ericrochester.klox
 
-import klox.TokenType.*
+import com.ericrochester.klox.TokenType.*
 
 class Scanner(private val source: String) {
     private val tokens = mutableListOf<Token>()
