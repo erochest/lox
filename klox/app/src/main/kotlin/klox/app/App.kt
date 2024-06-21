@@ -10,6 +10,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
 
+var hadError = false
+
 fun main(args: Array<String>) {
     if (args.size > 1) {
         println("Usage: klox [script]")
@@ -35,6 +37,7 @@ private fun runPrompt() {
         val line = reader.readLine()
         if (line == null) break
         run(line)
+        hadError = false
     }
 }
 
@@ -45,4 +48,15 @@ private fun run(source: String) {
     for (token in tokens) {
         println(token.toString())
     }
+
+    if (hadError) System.exit(65)
+}
+
+fun error(line: Int, message: String) {
+    report(line, "", message)
+}
+
+fun report(line: Int, where: String, message: String) {
+    println("[line $line] Error$where: $message")
+    hadError = true
 }
