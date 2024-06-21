@@ -57,7 +57,11 @@ class Scanner(private val source: String) {
 
             '\"' -> string()
 
-            else -> error(line, "Unexpected character.")
+            else -> {
+                if (isDigit(c)) number()
+                // else if (isAlpha(c)) identifier()
+                else error(line, "Unexpected character.")
+            }
         }
     }
 
@@ -76,6 +80,22 @@ class Scanner(private val source: String) {
 
         val value = source.substring(start + 1, current - 1)
         addToken(STRING, value)
+    }
+
+    private fun isDigit(c: Char): Boolean {
+        return c in '0'..'9'
+    }
+
+    private fun number() {
+        while (isDigit(peek())) advance()
+
+        if (peek() == '.' && isDigit(peekNext())) {
+            advance()
+            while (isDigit(peek())) advance()
+        }
+
+        val value = source.substring(start, current)
+        addToken(NUMBER, value.toDouble())
     }
 
     private fun advance(): Char {
@@ -99,5 +119,10 @@ class Scanner(private val source: String) {
     private fun peek(): Char {
         if (isAtEnd()) return '\u0000'
         return source[current]
+    }
+
+    private fun peekNext(): Char {
+        if (current + 1 >= source.length) return '\u0000'
+        return source[current + 1]
     }
 }
