@@ -10,6 +10,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
 
+import klox.Scanner
+
 var hadError = false
 
 fun main(args: Array<String>) {
