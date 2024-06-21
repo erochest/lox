@@ -1,5 +1,6 @@
 package com.ericrochester.klox
 
+import com.ericrochester.klox.app.error
 import com.ericrochester.klox.TokenType.*
 
 class Scanner(private val source: String) {
@@ -54,8 +55,27 @@ class Scanner(private val source: String) {
             }
             '\n' -> line++
 
-            _ -> Lox.error(line, "Unexpected character.")
+            '\"' -> string()
+
+            else -> error(line, "Unexpected character.")
         }
+    }
+
+    private fun string() {
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n') line++
+            advance()
+        }
+
+        if (isAtEnd()) {
+            error(line, "Unterminated string.")
+            return
+        }
+
+        advance()
+
+        val value = source.substring(start + 1, current - 1)
+        addToken(STRING, value)
     }
 
     private fun advance(): Char {
