@@ -1,5 +1,7 @@
 package klox
 
+import klox.TokenType.*
+
 class Scanner(private val source: String) {
     private val tokens = mutableListOf<Token>()
 
@@ -13,7 +15,7 @@ class Scanner(private val source: String) {
             scanToken()
         }
 
-        tokens.add(Token(TokenType.EOF, "", null, line))
+        tokens.add(Token(EOF, "", null, line))
         return tokens
     }
 
