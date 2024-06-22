@@ -8,10 +8,14 @@ plugins {
 
 dependencies {
     implementation("org.apache.commons:commons-text")
-    implementation(project(":utilities"))
+    // implementation(project(":utilities"))
 }
 
 application {
     // Define the main class for the application.
-    mainClass.set("klox.app.AppKt")
+    mainClass.set("com.ericrochester.klox.app.AppKt")
+}
+
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
 }
