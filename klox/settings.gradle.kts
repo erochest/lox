@@ -14,3 +14,4 @@ plugins {
 
 rootProject.name = "klox"
 include("app")
+include("tools")

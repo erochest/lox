@@ -1,0 +1,6 @@
+
+repl:
+    ./gradlew :app:run
+
+expr: 
+    ./gradlew :tools:run --args="{{invocation_directory()}}/app/src/main/kotlin/com/ericrochester/klox"
