@@ -6,11 +6,11 @@ class AstPrinter : ExprVisitor<String> {
     }
 
     override fun visitBinaryExpr(binary: Binary): String {
-        return parenthesize(binary.operator.lexeme, binary.left, binary.right)
+        return rpn(binary.left, binary.right, binary.operator.lexeme)
     }
 
     override fun visitGroupingExpr(grouping: Grouping): String {
-        return parenthesize("group", grouping.expression)
+        return grouping.expression.accept(this) // Grouping does not affect RPN notation
     }
 
     override fun visitLiteralExpr(literal: Literal): String {
@@ -18,14 +18,15 @@ class AstPrinter : ExprVisitor<String> {
     }
 
     override fun visitUnaryExpr(unary: Unary): String {
-        return parenthesize(unary.operator.lexeme, unary.right)
+        return rpn(unary.right, unary.operator.lexeme) // Unary operations in RPN place the operator after the operand
     }
 
-    private fun parenthesize(name: String, vararg exprs: Expr): String {
-        val builder = StringBuilder()
-        builder.append("(").append(name)
-        exprs.forEach { builder.append(" ").append(it.accept(this)) }
-        builder.append(")")
-        return builder.toString()
+    private fun rpn(vararg parts: Any): String {
+        return parts.joinToString(" ") { part ->
+            when (part) {
+                is Expr -> part.accept(this)
+                else -> part.toString()
+            }
+        }
     }
 }
