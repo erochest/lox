@@ -13,7 +13,7 @@ fun main(args: Array<String>) {
     defineAst(outputDir, "Expr", listOf(
         "Binary   : Expr left, Token operator, Expr right",
         "Grouping : Expr expression",
-        "Literal  : Object value",
+        "Literal  : Any? value",
         "Unary    : Token operator, Expr right"
     ))
 }

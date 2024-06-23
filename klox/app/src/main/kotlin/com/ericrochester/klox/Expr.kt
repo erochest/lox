@@ -32,7 +32,7 @@ data class Grouping(
 }
 
 data class Literal(
-    val value: Object,
+    val value: Any?,
 ) : Expr() {
     override fun <R> accept(visitor: ExprVisitor<R>): R {
         return visitor.visitLiteralExpr(this)

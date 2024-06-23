@@ -11,6 +11,14 @@ import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
 
 import com.ericrochester.klox.Scanner
+import com.ericrochester.klox.Expr
+import com.ericrochester.klox.Binary
+import com.ericrochester.klox.Unary
+import com.ericrochester.klox.Grouping
+import com.ericrochester.klox.Literal
+import com.ericrochester.klox.Token
+import com.ericrochester.klox.TokenType
+import com.ericrochester.klox.AstPrinter
 
 var hadError = false
 
@@ -23,6 +31,16 @@ fun main(args: Array<String>) {
     } else {
         runPrompt()
     }
+}
+
+fun print_ast_main() {
+    val expression = Binary(
+        Unary(Token(TokenType.MINUS, "-", null, 1), Literal(123.toDouble() as Any)),
+        Token(TokenType.STAR, "*", null, 1),
+        Grouping(Literal(45.67.toDouble() as Any))
+    )
+    val printer = AstPrinter()
+    println(printer.print(expression))
 }
 
 private fun runFile(path: String) {
