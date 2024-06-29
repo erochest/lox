@@ -3,7 +3,7 @@ build:
     ./gradlew build
 
 repl:
-    ./gradlew :app:run
+    ./gradlew :app:run --quiet --console=plain
 
 expr: 
-    ./gradlew :tools:run --args="{{invocation_directory()}}/app/src/main/kotlin/com/ericrochester/klox"
+    ./gradlew :tools:run --args="{{invocation_directory()}}/app/src/main/kotlin/com/ericrochester/klox" --quiet --console=plain
