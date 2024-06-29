@@ -3,6 +3,22 @@ package com.ericrochester.klox
 import com.ericrochester.klox.TokenType.*
 import com.ericrochester.klox.app.error as loxError
 
+// TODO: Add a comma operator between expressions
+// TODO: Add a ternary operator
+// TODO: Detect and handle the error of a binary operator occurring at the beginning of an expression (missing left-hand side)
+
+
+// The parser so far.
+// expression     → equality ;
+// equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+// comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+// term           → factor ( ( "-" | "+" ) factor )* ;
+// factor         → unary ( ( "/" | "*" ) unary )* ;
+// unary          → ( "!" | "-" ) unary
+//                | primary ;
+// primary        → NUMBER | STRING | "true" | "false" | "nil"
+//                | "(" expression ")" ;
+
 class Parser(private val tokens: List<Token>) {
     private class ParseError: RuntimeException()
 
