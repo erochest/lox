@@ -71,7 +71,6 @@ private fun run(source: String) {
     if (hadError) return
 
     expression?.let {
-        println("PRINTING EXPRESSION")
         val printer = AstPrinter()
         println(printer.print(it))
     }
