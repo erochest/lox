@@ -6,11 +6,9 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-// TODO: Detect and handle the error of a binary operator occurring at the beginning of an expression (missing left-hand side)
-
-
 // The parser so far.
-// expression     → ternary ( "," ternary )* ;
+// expression     → ternary ( "," ternary )*
+//                | ( "," | "?" | "!=" | "==" | ">" | ">=" | "<" | "<=" | "+" | "/" | "*" ) ;
 // ternary        → equality ( "?" expression ":" expression )? ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 // comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
@@ -42,6 +40,10 @@ class Parser(private val tokens: List<Token>) {
 
     private fun expression(): Expr {
         logger.debug { "Parsing expression: " + peek().toString() }
+
+        if (match(COMMA, QUESTION, BANG_EQUAL, EQUAL_EQUAL, GREATER, GREATER_EQUAL, LESS, LESS_EQUAL, PLUS, SLASH, STAR)) {
+            throw error(previous(), "Unexpected binary operator at start of expression.")
+        }
         return leftAssociativeBinary(arrayOf(COMMA)) { ternary() }
     }
 
