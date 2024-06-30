@@ -21,6 +21,10 @@ class AstPrinter : ExprVisitor<String> {
         return rpn(unary.right, unary.operator.lexeme) // Unary operations in RPN place the operator after the operand
     }
 
+    override fun visitTernaryExpr(ternary: Ternary): String {
+        return rpn(ternary.condition, ternary.then, ternary.alternative, "?:")
+    }
+
     private fun rpn(vararg parts: Any): String {
         return parts.joinToString(" ") { part ->
             when (part) {

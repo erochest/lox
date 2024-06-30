@@ -11,6 +11,7 @@ interface ExprVisitor<R> {
     fun visitGroupingExpr(grouping: Grouping): R
     fun visitLiteralExpr(literal: Literal): R
     fun visitUnaryExpr(unary: Unary): R
+    fun visitTernaryExpr(ternary: Ternary): R
 }
 
 data class Binary(
@@ -20,6 +21,16 @@ data class Binary(
 ) : Expr() {
     override fun <R> accept(visitor: ExprVisitor<R>): R {
         return visitor.visitBinaryExpr(this)
+    }
+}
+
+data class Ternary(
+    val condition: Expr,
+    val then: Expr,
+    val alternative: Expr,
+) : Expr() {
+    override fun <R> accept(visitor: ExprVisitor<R>): R {
+        return visitor.visitTernaryExpr(this)
     }
 }
 

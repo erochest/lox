@@ -1,14 +1,17 @@
 package com.ericrochester.klox
 
-import com.ericrochester.klox.TokenType.*
 import com.ericrochester.klox.app.error as loxError
+import com.ericrochester.klox.TokenType.*
+import mu.KotlinLogging
 
-// TODO: Add a ternary operator
+private val logger = KotlinLogging.logger {}
+
 // TODO: Detect and handle the error of a binary operator occurring at the beginning of an expression (missing left-hand side)
 
 
 // The parser so far.
-// expression     → equality ( "," equality )* ;
+// expression     → ternary ( "," ternary )* ;
+// ternary        → equality ( "?" expression ":" expression )? ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 // comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 // term           → factor ( ( "-" | "+" ) factor )* ;
@@ -26,36 +29,58 @@ class Parser(private val tokens: List<Token>) {
     // Interface
 
     fun parse(): Expr? {
-        try {
-            return expression()
+        logger.debug { "Starting parse: " + peek().toString() }
+        return try {
+            expression()
         } catch (e: ParseError) {
-            return null
+            logger.error(e) { "Parse error: " + peek().toString() }
+            null
         }
     }
 
     // Productions
 
     private fun expression(): Expr {
-        return leftAssociativeBinary(arrayOf(COMMA)) { equality() }
+        logger.debug { "Parsing expression: " + peek().toString() }
+        return leftAssociativeBinary(arrayOf(COMMA)) { ternary() }
+    }
+
+    private fun ternary(): Expr {
+        logger.debug { "Parsing ternary: " + peek().toString() }
+        val expr = equality()
+
+        if (match(QUESTION)) {
+            val then = expression()
+            consume(COLON, "Expect ':' after '?'.")
+            val alternative = expression()
+            return Ternary(expr, then, alternative)
+        }
+
+        return expr
     }
 
     private fun equality(): Expr {
+        logger.debug { "Parsing equality: " + peek().toString() }
         return leftAssociativeBinary(arrayOf(BANG_EQUAL, EQUAL_EQUAL)) { comparison() }
     }
 
     private fun comparison(): Expr {
+        logger.debug { "Parsing comparison: " + peek().toString() }
         return leftAssociativeBinary(arrayOf(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) { term() }
     }
 
     private fun term(): Expr {
+        logger.debug { "Parsing term: " + peek().toString() }
         return leftAssociativeBinary(arrayOf(MINUS, PLUS)) { factor() }
     }
 
     private fun factor(): Expr {
+        logger.debug { "Parsing factor: " + peek().toString() }
         return leftAssociativeBinary(arrayOf(SLASH, STAR)) { unary() }
     }
 
     private fun unary(): Expr {
+        logger.debug { "Parsing unary: " + peek().toString() }
         if (match(BANG, MINUS)) {
             val op = previous()
             val right = unary()
@@ -65,6 +90,7 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun primary(): Expr {
+        logger.debug { "Parsing primary: " + peek().toString() }
         if (match(FALSE)) return Literal(false)
         if (match(TRUE)) return Literal(true)
         if (match(NIL)) return Literal(null)

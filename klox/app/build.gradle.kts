@@ -9,6 +9,8 @@ plugins {
 dependencies {
     implementation("org.apache.commons:commons-text")
     // implementation(project(":tools"))
+    implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
+    implementation("org.slf4j:slf4j-simple:2.0.13")
 }
 
 application {
