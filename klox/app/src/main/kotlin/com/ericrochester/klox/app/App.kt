@@ -11,17 +11,16 @@ import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
 
 import com.ericrochester.klox.Scanner
-import com.ericrochester.klox.Expr
-import com.ericrochester.klox.Binary
-import com.ericrochester.klox.Unary
-import com.ericrochester.klox.Grouping
-import com.ericrochester.klox.Literal
 import com.ericrochester.klox.Token
 import com.ericrochester.klox.TokenType
-import com.ericrochester.klox.AstPrinter
 import com.ericrochester.klox.Parser
+import com.ericrochester.klox.Interpreter
+import com.ericrochester.klox.RuntimeError
+
+val interpreter: Interpreter = Interpreter()
 
 var hadError = false
+var hadRuntimeError = false
 
 fun main(args: Array<String>) {
     if (args.size > 1) {
@@ -34,20 +33,12 @@ fun main(args: Array<String>) {
     }
 }
 
-fun print_ast_main() {
-    val expression = Binary(
-        Unary(Token(TokenType.MINUS, "-", null, 1), Literal(123.toDouble() as Any)),
-        Token(TokenType.STAR, "*", null, 1),
-        Grouping(Literal(45.67.toDouble() as Any))
-    )
-    val printer = AstPrinter()
-    println(printer.print(expression))
-}
-
 private fun runFile(path: String) {
     val bytes = Files.readAllBytes(Paths.get(path))
     val source = String(bytes, StandardCharsets.UTF_8)
     run(source)
+    if (hadError) System.exit(65)
+    if (hadRuntimeError) System.exit(70)
 }
 
 private fun runPrompt() {
@@ -71,8 +62,7 @@ private fun run(source: String) {
     if (hadError) return
 
     expression?.let {
-        val printer = AstPrinter()
-        println(printer.print(it))
+        interpreter.interpret(it)
     }
 }
 
@@ -89,6 +79,11 @@ fun error(token: Token, message: String) {
 }
 
 fun report(line: Int, where: String, message: String) {
-    println("[line $line] Error$where: $message")
+    System.err.println("[line $line] Error$where: $message")
     hadError = true
+}
+
+fun runtimeError(error: RuntimeError) {
+    System.err.println("${error.message} [line ${error.token.line}]")
+    hadRuntimeError = true
 }
