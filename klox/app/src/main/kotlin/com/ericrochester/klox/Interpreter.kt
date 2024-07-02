@@ -2,7 +2,6 @@ package com.ericrochester.klox
 
 import com.ericrochester.klox.app.runtimeError
 
-// TODO: Support casting the other value to a string if one of the operands of + is a string
 // TODO: runtime error for divid by zero
 
 class Interpreter: ExprVisitor<Any?> {
@@ -47,6 +46,8 @@ class Interpreter: ExprVisitor<Any?> {
             }
             TokenType.PLUS -> if (left is Double && right is Double) left + right
                               else if (left is String && right is String) left + right
+                              else if (left is String) left + stringify(right)
+                              else if (right is String) stringify(left) + right
                               else throw RuntimeError(binary.operator, "Operands must be two numbers or two strings: ${binary.operator.lexeme}")
             TokenType.SLASH -> {
                 checkNumberOperands(binary.operator, left, right)
