@@ -14,11 +14,11 @@ fun main(args: Array<String>) {
       outputDir,
       "Expr",
       listOf(
-        "Ternary  : Expr condition, Expr thenBranch, Expr elseBranch",
-        "Binary   : Expr left, Token operator, Expr right",
-        "Grouping : Expr expression",
-        "Literal  : Any? value",
-        "Unary    : Token operator, Expr right"
+          "Ternary  : Expr condition, Expr thenBranch, Expr elseBranch",
+          "Binary   : Expr left, Token operator, Expr right",
+          "Grouping : Expr expression",
+          "Literal  : Any? value",
+          "Unary    : Token operator, Expr right"
       )
   )
   defineAst(
@@ -77,4 +77,3 @@ fun splitPair(on: String, field: String): Pair<String, String> {
   val parts = field.trim().split(on)
   return parts[0].trim() to parts[1].trim()
 }
-
