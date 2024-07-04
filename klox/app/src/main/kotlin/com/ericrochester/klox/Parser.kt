@@ -7,6 +7,13 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 // The parser so far.
+// program        → statement* EOF ;
+//
+// statement      → exprStmt
+//                | printStmt ;
+//
+// exprStmt       → expression ";" ;
+// printStmt      → "print" expression ";" ;
 // expression     → ternary ( "," ternary )*
 //                | ( "," | "?" | "!=" | "==" | ">" | ">=" | "<" | "<=" | "+" | "/" | "*" ) ;
 // ternary        → equality ( "?" expression ":" expression )? ;
