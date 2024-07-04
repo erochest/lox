@@ -33,17 +33,33 @@ class Parser(private val tokens: List<Token>) {
 
     // Interface
 
-    fun parse(): Expr? {
+    fun parse(): List<Stmt> {
         logger.debug { "Starting parse: " + peek().toString() }
-        return try {
-            expression()
-        } catch (e: ParseError) {
-            logger.error(e) { "Parse error: " + peek().toString() }
-            null
+        val statements: MutableList<Stmt> = mutableListOf()
+        while (!isAtEnd()) {
+          statements.add(statement())
         }
+
+        return statements
     }
 
     // Productions
+    private fun statement(): Stmt {
+      if (match(PRINT)) return printStatement()
+      return expressionStatement()
+    }
+
+    private fun printStatement(): Stmt {
+      val value = expression()
+      consume(SEMICOLON, "Expect ';' after value.")
+      return Print(value)
+    }
+
+    private fun expressionStatement(): Stmt {
+      val value = expression();
+      consume(SEMICOLON, "Expect ';' after expression.")
+      return Expression(value)
+    }
 
     private fun expression(): Expr {
         logger.debug { "Parsing expression: " + peek().toString() }
