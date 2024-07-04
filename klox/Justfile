@@ -5,5 +5,8 @@ build:
 repl:
     ./gradlew :app:run --quiet --console=plain
 
+script script_file:
+  ./gradlew :app:run --args="{{invocation_directory()}}/{{script_file}}" --quiet --console=plain
+
 expr: 
     ./gradlew :tools:run --args="{{invocation_directory()}}/app/src/main/kotlin/com/ericrochester/klox" --quiet --console=plain

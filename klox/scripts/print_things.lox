@@ -1,0 +1,6 @@
+
+print "one";
+print true;
+print nil;
+print (7+13)/2;
+

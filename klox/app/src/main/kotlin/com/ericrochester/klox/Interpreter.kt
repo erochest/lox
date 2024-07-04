@@ -2,16 +2,19 @@ package com.ericrochester.klox
 
 import com.ericrochester.klox.app.runtimeError
 
-class Interpreter : ExprVisitor<Any?> {
+class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
 
-  fun interpret(expr: Expr) {
+  fun interpret(statements: List<Stmt>) {
     try {
-      val result = evaluate(expr)
-      println(stringify(result))
+      for (statement in statements) {
+        execute(statement)
+      }
     } catch (error: RuntimeError) {
       runtimeError(error)
     }
   }
+
+  // Expression visitor
 
   override fun visitLiteralExpr(literal: Literal): Any? {
     return literal.value
@@ -87,6 +90,23 @@ class Interpreter : ExprVisitor<Any?> {
   override fun visitTernaryExpr(ternary: Ternary): Any? {
     val condition = evaluate(ternary.condition)
     return if (isTruthy(condition)) evaluate(ternary.thenBranch) else evaluate(ternary.elseBranch)
+  }
+
+  // Statement visitor
+  
+  override fun visitExpressionStmt(expression: Expression) {
+    evaluate(expression.expression)
+  }
+
+  override fun visitPrintStmt(print: Print) {
+    val value = evaluate(print.expression)
+    println(stringify(value))
+  }
+
+  // Helpers
+
+  private fun execute(stmt: Stmt) {
+    stmt.accept(this)
   }
 
   private fun evaluate(expr: Expr): Any? {
