@@ -7,11 +7,12 @@ abstract class Expr {
 }
 
 interface ExprVisitor<R> {
-    fun visitTernaryExpr(ternary: Ternary): R
-    fun visitBinaryExpr(binary: Binary): R
-    fun visitGroupingExpr(grouping: Grouping): R
-    fun visitLiteralExpr(literal: Literal): R
-    fun visitUnaryExpr(unary: Unary): R
+    fun visitTernaryExpr(ternaryExpr: Ternary): R
+    fun visitBinaryExpr(binaryExpr: Binary): R
+    fun visitGroupingExpr(groupingExpr: Grouping): R
+    fun visitLiteralExpr(literalExpr: Literal): R
+    fun visitUnaryExpr(unaryExpr: Unary): R
+    fun visitVariableExpr(variableExpr: Variable): R
 }
 
 data class Ternary(
@@ -56,6 +57,14 @@ data class Unary(
 ) : Expr() {
     override fun <R> accept(visitor: ExprVisitor<R>): R {
         return visitor.visitUnaryExpr(this)
+    }
+}
+
+data class Variable(
+    val name: Token,
+) : Expr() {
+    override fun <R> accept(visitor: ExprVisitor<R>): R {
+        return visitor.visitVariableExpr(this)
     }
 }
 

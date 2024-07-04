@@ -8,5 +8,5 @@ repl:
 script script_file:
     ./gradlew :app:run --args="{{invocation_directory()}}/{{script_file}}" --quiet --console=plain
 
-expr: 
+genparser: 
     ./gradlew :tools:run --args="{{invocation_directory()}}/app/src/main/kotlin/com/ericrochester/klox" --quiet --console=plain

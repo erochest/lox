@@ -18,7 +18,8 @@ fun main(args: Array<String>) {
           "Binary   : Expr left, Token operator, Expr right",
           "Grouping : Expr expression",
           "Literal  : Any? value",
-          "Unary    : Token operator, Expr right"
+          "Unary    : Token operator, Expr right",
+          "Variable : Token name",
       )
   )
   defineAst(
@@ -27,6 +28,7 @@ fun main(args: Array<String>) {
       listOf(
           "Expression : Expr expression",
           "Print      : Expr expression",
+          "Var        : Token name, Expr? initializer",
       )
   )
 }
@@ -55,7 +57,9 @@ fun defineVisitor(writer: PrintWriter, baseName: String, types: List<String>) {
   writer.println("interface ${baseName}Visitor<R> {")
   types.forEach { type ->
     val (className, _) = splitPair(":", type)
-    writer.println("    fun visit$className${baseName}(${className.lowercase()}: $className): R")
+    writer.println(
+        "    fun visit$className${baseName}(${className.lowercase()}${baseName}: $className): R"
+    )
   }
   writer.println("}\n")
 }
