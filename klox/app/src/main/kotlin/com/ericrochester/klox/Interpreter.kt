@@ -86,7 +86,7 @@ class Interpreter : ExprVisitor<Any?> {
 
   override fun visitTernaryExpr(ternary: Ternary): Any? {
     val condition = evaluate(ternary.condition)
-    return if (isTruthy(condition)) evaluate(ternary.then) else evaluate(ternary.alternative)
+    return if (isTruthy(condition)) evaluate(ternary.thenBranch) else evaluate(ternary.elseBranch)
   }
 
   private fun evaluate(expr: Expr): Any? {

@@ -22,7 +22,7 @@ class AstPrinter : ExprVisitor<String> {
     }
 
     override fun visitTernaryExpr(ternary: Ternary): String {
-        return rpn(ternary.condition, ternary.then, ternary.alternative, "?:")
+        return rpn(ternary.condition, ternary.thenBranch, ternary.elseBranch, "?:")
     }
 
     private fun rpn(vararg parts: Any): String {

@@ -7,10 +7,21 @@ abstract class Expr {
 }
 
 interface ExprVisitor<R> {
+    fun visitTernaryExpr(ternary: Ternary): R
     fun visitBinaryExpr(binary: Binary): R
     fun visitGroupingExpr(grouping: Grouping): R
     fun visitLiteralExpr(literal: Literal): R
     fun visitUnaryExpr(unary: Unary): R
+}
+
+data class Ternary(
+    val condition: Expr,
+    val thenBranch: Expr,
+    val elseBranch: Expr,
+) : Expr() {
+    override fun <R> accept(visitor: ExprVisitor<R>): R {
+        return visitor.visitTernaryExpr(this)
+    }
 }
 
 data class Binary(
