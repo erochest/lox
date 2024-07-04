@@ -3,6 +3,7 @@ package com.ericrochester.klox
 import com.ericrochester.klox.app.runtimeError
 
 class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
+  val environment = Environment()
 
   fun interpret(statements: List<Stmt>) {
     try {
@@ -92,6 +93,10 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     return if (isTruthy(condition)) evaluate(ternary.thenBranch) else evaluate(ternary.elseBranch)
   }
 
+  override fun visitVariableExpr(variableExpr: Variable): Any? {
+    return environment.get(variable.name)
+  }
+
   // Statement visitor
   
   override fun visitExpressionStmt(expression: Expression) {
@@ -101,6 +106,11 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
   override fun visitPrintStmt(print: Print) {
     val value = evaluate(print.expression)
     println(stringify(value))
+  }
+
+  override fun visitVarStmt(varStmt: Var) {
+    val value = varStmt.initializer?.let { evaluate(it) }
+    environment.define(varStmt.name.lexeme, value)
   }
 
   // Helpers
