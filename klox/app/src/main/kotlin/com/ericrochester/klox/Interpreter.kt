@@ -17,33 +17,37 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
 
   // Expression visitor
 
-  override fun visitLiteralExpr(literal: Literal): Any? {
-    return literal.value
+  override fun visitLiteralExpr(literalExpr: Literal): Any? {
+    return literalExpr.value
   }
 
-  override fun visitGroupingExpr(grouping: Grouping): Any? {
-    return evaluate(grouping.expression)
+  override fun visitGroupingExpr(groupingExpr: Grouping): Any? {
+    return evaluate(groupingExpr.expression)
   }
 
-  override fun visitUnaryExpr(unary: Unary): Any? {
-    val right = evaluate(unary.right)
-    return when (unary.operator.type) {
+  override fun visitUnaryExpr(unaryExpr: Unary): Any? {
+    val right = evaluate(unaryExpr.right)
+    return when (unaryExpr.operator.type) {
       TokenType.MINUS -> {
-        checkNumberOperand(unary.operator, right)
+        checkNumberOperand(unaryExpr.operator, right)
         -1 * (right as Double)
       }
       TokenType.BANG -> !isTruthy(right)
-      else -> throw RuntimeError(unary.operator, "Unknown unary operator: ${unary.operator.lexeme}")
+      else ->
+          throw RuntimeError(
+              unaryExpr.operator,
+              "Unknown unary operator: ${unaryExpr.operator.lexeme}"
+          )
     }
   }
 
-  override fun visitBinaryExpr(binary: Binary): Any? {
-    val left = evaluate(binary.left)
-    val right = evaluate(binary.right)
+  override fun visitBinaryExpr(binaryExpr: Binary): Any? {
+    val left = evaluate(binaryExpr.left)
+    val right = evaluate(binaryExpr.right)
 
-    return when (binary.operator.type) {
+    return when (binaryExpr.operator.type) {
       TokenType.MINUS -> {
-        checkNumberOperands(binary.operator, left, right)
+        checkNumberOperands(binaryExpr.operator, left, right)
         left as Double - right as Double
       }
       TokenType.PLUS ->
@@ -53,64 +57,74 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
           else if (right is String) stringify(left) + right
           else
               throw RuntimeError(
-                  binary.operator,
-                  "Operands must be two numbers or two strings: ${binary.operator.lexeme}"
+                  binaryExpr.operator,
+                  "Operands must be two numbers or two strings: ${binaryExpr.operator.lexeme}"
               )
       TokenType.SLASH -> {
-        checkNumberOperands(binary.operator, left, right)
-        if (right as Double == 0.0) throw RuntimeError(binary.operator, "Division by zero")
-        left as Double / right as Double
+        checkNumberOperands(binaryExpr.operator, left, right)
+        if (right as Double == 0.0) throw RuntimeError(binaryExpr.operator, "Division by zero")
+        left as Double / right
       }
       TokenType.STAR -> {
-        checkNumberOperands(binary.operator, left, right)
+        checkNumberOperands(binaryExpr.operator, left, right)
         left as Double * right as Double
       }
       TokenType.GREATER -> {
-        checkNumberOperands(binary.operator, left, right)
+        checkNumberOperands(binaryExpr.operator, left, right)
         left as Double > right as Double
       }
       TokenType.GREATER_EQUAL -> {
-        checkNumberOperands(binary.operator, left, right)
+        checkNumberOperands(binaryExpr.operator, left, right)
         left as Double >= right as Double
       }
       TokenType.LESS -> {
-        checkNumberOperands(binary.operator, left, right)
+        checkNumberOperands(binaryExpr.operator, left, right)
         (left as Double) < (right as Double)
       }
       TokenType.LESS_EQUAL -> {
-        checkNumberOperands(binary.operator, left, right)
+        checkNumberOperands(binaryExpr.operator, left, right)
         left as Double <= right as Double
       }
       TokenType.EQUAL_EQUAL -> isEqual(left, right)
       TokenType.BANG_EQUAL -> !isEqual(left, right)
       else ->
-          throw RuntimeError(binary.operator, "Unknown binary operator: ${binary.operator.lexeme}")
+          throw RuntimeError(
+              binaryExpr.operator,
+              "Unknown binary operator: ${binaryExpr.operator.lexeme}"
+          )
     }
   }
 
-  override fun visitTernaryExpr(ternary: Ternary): Any? {
-    val condition = evaluate(ternary.condition)
-    return if (isTruthy(condition)) evaluate(ternary.thenBranch) else evaluate(ternary.elseBranch)
+  override fun visitTernaryExpr(ternaryExpr: Ternary): Any? {
+    val condition = evaluate(ternaryExpr.condition)
+    return if (isTruthy(condition)) evaluate(ternaryExpr.thenBranch)
+    else evaluate(ternaryExpr.elseBranch)
   }
 
   override fun visitVariableExpr(variableExpr: Variable): Any? {
-    return environment.get(variable.name)
+    return environment.get(variableExpr.name)
   }
 
   // Statement visitor
-  
-  override fun visitExpressionStmt(expression: Expression) {
-    evaluate(expression.expression)
+
+  override fun visitExpressionStmt(expressionStmt: Expression) {
+    evaluate(expressionStmt.expression)
   }
 
-  override fun visitPrintStmt(print: Print) {
-    val value = evaluate(print.expression)
+  override fun visitPrintStmt(printStmt: Print) {
+    val value = evaluate(printStmt.expression)
     println(stringify(value))
   }
 
   override fun visitVarStmt(varStmt: Var) {
     val value = varStmt.initializer?.let { evaluate(it) }
     environment.define(varStmt.name.lexeme, value)
+  }
+
+  override fun visitAssignExpr(assignExpr: Assign): Any? {
+    val value = evaluate(assignExpr.value)
+    environment.assign(assignExpr.name, value)
+    return value
   }
 
   // Helpers
@@ -161,4 +175,3 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     return value.toString()
   }
 }
-

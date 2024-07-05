@@ -18,7 +18,9 @@ private val logger = KotlinLogging.logger {}
 // varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 // exprStmt       → expression ";" ;
 // printStmt      → "print" expression ";" ;
-// expression     → ternary ( "," ternary )*
+// expression     → assignment ;
+// assignment     → IDENTIFIER "=" assignment
+//                | ternary
 //                | ( "," | "?" | "!=" | "==" | ">" | ">=" | "<" | "<=" | "+" | "/" | "*" ) ;
 // ternary        → equality ( "?" expression ":" expression )? ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
@@ -107,7 +109,24 @@ class Parser(private val tokens: List<Token>) {
     ) {
       throw error(previous(), "Unexpected binary operator at start of expression.")
     }
-    return leftAssociativeBinary(arrayOf(COMMA)) { ternary() }
+    return assignment()
+  }
+
+  private fun assignment(): Expr {
+    val expr = ternary()
+
+    if (match(EQUAL)) {
+      val equals = previous()
+      val value = assignment()
+
+      if (expr is Variable) {
+        val name = expr.name
+        return Assign(name, value)
+      }
+      throw error(equals, "Invalid assignment target.")
+    }
+
+    return expr
   }
 
   private fun ternary(): Expr {

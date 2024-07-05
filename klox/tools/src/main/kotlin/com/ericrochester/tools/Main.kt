@@ -14,6 +14,7 @@ fun main(args: Array<String>) {
       outputDir,
       "Expr",
       listOf(
+          "Assign   : Token name, Expr value",
           "Ternary  : Expr condition, Expr thenBranch, Expr elseBranch",
           "Binary   : Expr left, Token operator, Expr right",
           "Grouping : Expr expression",

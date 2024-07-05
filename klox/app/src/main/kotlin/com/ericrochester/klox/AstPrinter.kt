@@ -1,36 +1,47 @@
 package com.ericrochester.klox
 
 class AstPrinter : ExprVisitor<String> {
-    fun print(expr: Expr): String {
-        return expr.accept(this)
-    }
+  fun print(expr: Expr): String {
+    return expr.accept(this)
+  }
 
-    override fun visitBinaryExpr(binary: Binary): String {
-        return rpn(binary.left, binary.right, binary.operator.lexeme)
-    }
+  override fun visitBinaryExpr(binaryExpr: Binary): String {
+    return rpn(binaryExpr.left, binaryExpr.right, binaryExpr.operator.lexeme)
+  }
 
-    override fun visitGroupingExpr(grouping: Grouping): String {
-        return grouping.expression.accept(this) // Grouping does not affect RPN notation
-    }
+  override fun visitGroupingExpr(groupingExpr: Grouping): String {
+    return groupingExpr.expression.accept(this) // groupingExpr does not affect RPN notation
+  }
 
-    override fun visitLiteralExpr(literal: Literal): String {
-        return literal.value?.toString() ?: "nil"
-    }
+  override fun visitLiteralExpr(literalExpr: Literal): String {
+    return literalExpr.value?.toString() ?: "nil"
+  }
 
-    override fun visitUnaryExpr(unary: Unary): String {
-        return rpn(unary.right, unary.operator.lexeme) // Unary operations in RPN place the operator after the operand
-    }
+  override fun visitUnaryExpr(unaryExpr: Unary): String {
+    return rpn(
+        unaryExpr.right,
+        unaryExpr.operator.lexeme
+    ) // Unary operations in RPN place the operator after the operand
+  }
 
-    override fun visitTernaryExpr(ternary: Ternary): String {
-        return rpn(ternary.condition, ternary.thenBranch, ternary.elseBranch, "?:")
-    }
+  override fun visitTernaryExpr(ternaryExpr: Ternary): String {
+    return rpn(ternaryExpr.condition, ternaryExpr.thenBranch, ternaryExpr.elseBranch, "?:")
+  }
 
-    private fun rpn(vararg parts: Any): String {
-        return parts.joinToString(" ") { part ->
-            when (part) {
-                is Expr -> part.accept(this)
-                else -> part.toString()
-            }
-        }
+  override fun visitAssignExpr(assignExpr: Assign): String {
+    return rpn(assignExpr.value, assignExpr.name.lexeme, "=")
+  }
+
+  override fun visitVariableExpr(variableExpr: Variable): String {
+    return variableExpr.name.lexeme
+  }
+
+  private fun rpn(vararg parts: Any): String {
+    return parts.joinToString(" ") { part ->
+      when (part) {
+        is Expr -> part.accept(this)
+        else -> part.toString()
+      }
     }
+  }
 }
