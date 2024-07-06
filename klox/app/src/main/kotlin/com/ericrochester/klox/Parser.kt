@@ -14,6 +14,9 @@ private val logger = KotlinLogging.logger {}
 //
 // statement      → exprStmt
 //                | printStmt ;
+//                | block ;
+//
+// block          → "{" declaration* "}" ;
 //
 // varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 // exprStmt       → expression ";" ;
@@ -63,6 +66,7 @@ class Parser(private val tokens: List<Token>) {
 
   private fun statement(): Stmt {
     if (match(PRINT)) return printStatement()
+    if (match(LEFT_BRACE)) return Block(block())
     return expressionStatement()
   }
 
@@ -76,6 +80,17 @@ class Parser(private val tokens: List<Token>) {
     val value = expression()
     consume(SEMICOLON, "Expect ';' after expression.")
     return Expression(value)
+  }
+
+  private fun block(): List<Stmt?> {
+    val statements: MutableList<Stmt?> = mutableListOf()
+
+    while (!check(RIGHT_BRACE) && !isAtEnd()) {
+      statements.add(declaration())
+    }
+
+    consume(RIGHT_BRACE, "Expect '}' after block.")
+    return statements
   }
 
   private fun varDeclaration(): Stmt {

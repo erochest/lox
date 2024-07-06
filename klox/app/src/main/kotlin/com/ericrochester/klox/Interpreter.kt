@@ -3,12 +3,12 @@ package com.ericrochester.klox
 import com.ericrochester.klox.app.runtimeError
 
 class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
-  val environment = Environment()
+  var environment = Environment()
 
-  fun interpret(statements: List<Stmt>) {
+  fun interpret(statements: List<Stmt?>) {
     try {
       for (statement in statements) {
-        execute(statement)
+        statement?.let { execute(it) }
       }
     } catch (error: RuntimeError) {
       runtimeError(error)
@@ -127,10 +127,28 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     return value
   }
 
+  override fun visitBlockStmt(blockStmt: Block) {
+    executeBlock(blockStmt.statements, Environment(environment))
+  }
+
   // Helpers
 
   private fun execute(stmt: Stmt) {
     stmt.accept(this)
+  }
+
+  private fun executeBlock(statements: List<Stmt?>, environment: Environment) {
+    val previous = this.environment
+
+    try {
+      this.environment = environment
+
+      for (statement in statements) {
+        statement?.let { execute(it) }
+      }
+    } finally {
+      this.environment = previous
+    }
   }
 
   private fun evaluate(expr: Expr): Any? {
