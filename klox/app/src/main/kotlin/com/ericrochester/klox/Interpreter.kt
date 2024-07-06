@@ -111,6 +111,14 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     evaluate(expressionStmt.expression)
   }
 
+  override fun visitIfStmt(ifStmt: If) {
+    if (isTruthy(evaluate(ifStmt.condition))) {
+      execute(ifStmt.thenBranch)
+    } else {
+      ifStmt.elseBranch?.let { execute(it) }
+    }
+  }
+
   override fun visitPrintStmt(printStmt: Print) {
     val value = evaluate(printStmt.expression)
     println(stringify(value))

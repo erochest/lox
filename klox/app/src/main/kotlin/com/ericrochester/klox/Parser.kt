@@ -13,13 +13,16 @@ private val logger = KotlinLogging.logger {}
 //                | statement ;
 //
 // statement      → exprStmt
-//                | printStmt ;
+//                | ifStmt
+//                | printStmt
 //                | block ;
 //
 // block          → "{" declaration* "}" ;
 //
 // varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 // exprStmt       → expression ";" ;
+// ifStmt         → "if" "(" expression ")" statement
+//                ( "else" statement )? ;
 // printStmt      → "print" expression ";" ;
 // expression     → assignment ;
 // assignment     → IDENTIFIER "=" assignment
@@ -67,6 +70,7 @@ class Parser(private val tokens: List<Token>) {
   private fun statement(): Stmt {
     if (match(PRINT)) return printStatement()
     if (match(LEFT_BRACE)) return Block(block())
+    if (match(IF)) return ifStatement()
     return expressionStatement()
   }
 
@@ -91,6 +95,19 @@ class Parser(private val tokens: List<Token>) {
 
     consume(RIGHT_BRACE, "Expect '}' after block.")
     return statements
+  }
+
+  private fun ifStatement(): Stmt {
+    consume(LEFT_PAREN, "Expect '(' after 'if'.")
+    val condition = expression()
+    consume(RIGHT_PAREN, "Expect ')' after if condition.")
+
+    val thenBranch = statement()
+    var elseBranch: Stmt? = null
+    if (match(ELSE)) {
+      elseBranch = statement()
+    }
+    return If(condition, thenBranch, elseBranch)
   }
 
   private fun varDeclaration(): Stmt {
