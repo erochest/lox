@@ -18,7 +18,7 @@ fun main(args: Array<String>) {
           "Binary   : Expr left, Token operator, Expr right",
           "Grouping : Expr expression",
           "Literal  : Any? value",
-          "Logical  : Expr left, Token operator",
+          "Logical  : Expr left, Token operator, Expr right",
           "Unary    : Token operator, Expr right",
           "Variable : Token name",
       )
@@ -32,6 +32,7 @@ fun main(args: Array<String>) {
           "If         : Expr condition, Stmt thenBranch, Stmt? elseBranch",
           "Print      : Expr expression",
           "Var        : Token name, Expr? initializer",
+          "While      : Expr condition, Stmt body"
       )
   )
 }

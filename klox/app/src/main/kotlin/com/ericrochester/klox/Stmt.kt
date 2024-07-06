@@ -12,6 +12,7 @@ interface StmtVisitor<R> {
     fun visitIfStmt(ifStmt: If): R
     fun visitPrintStmt(printStmt: Print): R
     fun visitVarStmt(varStmt: Var): R
+    fun visitWhileStmt(whileStmt: While): R
 }
 
 data class Block(
@@ -54,6 +55,15 @@ data class Var(
 ) : Stmt() {
     override fun <R> accept(visitor: StmtVisitor<R>): R {
         return visitor.visitVarStmt(this)
+    }
+}
+
+data class While(
+    val condition: Expr,
+    val body: Stmt,
+) : Stmt() {
+    override fun <R> accept(visitor: StmtVisitor<R>): R {
+        return visitor.visitWhileStmt(this)
     }
 }
 

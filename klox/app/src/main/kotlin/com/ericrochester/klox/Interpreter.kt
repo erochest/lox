@@ -133,6 +133,12 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     environment.define(varStmt.name.lexeme, value)
   }
 
+  override fun visitWhileStmt(whileStmt: While) {
+    while (isTruthy(evaluate(whileStmt.condition))) {
+      execute(whileStmt.body)
+    }
+  }
+
   override fun visitAssignExpr(assignExpr: Assign): Any? {
     val value = evaluate(assignExpr.value)
     environment.assign(assignExpr.name, value)

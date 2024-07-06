@@ -15,6 +15,7 @@ private val logger = KotlinLogging.logger {}
 // statement      → exprStmt
 //                | ifStmt
 //                | printStmt
+//                | whileStmt
 //                | block ;
 //
 // block          → "{" declaration* "}" ;
@@ -24,6 +25,7 @@ private val logger = KotlinLogging.logger {}
 // ifStmt         → "if" "(" expression ")" statement
 //                ( "else" statement )? ;
 // printStmt      → "print" expression ";" ;
+// whileStmt      → "while" "(" expression ")" statement ;
 // expression     → assignment ;
 // assignment     → IDENTIFIER "=" assignment
 //                | logic_or ;
@@ -69,6 +71,7 @@ class Parser(private val tokens: List<Token>) {
 
   private fun statement(): Stmt {
     if (match(PRINT)) return printStatement()
+    if (match(WHILE)) return whileStatement()
     if (match(LEFT_BRACE)) return Block(block())
     if (match(IF)) return ifStatement()
     return expressionStatement()
@@ -78,6 +81,15 @@ class Parser(private val tokens: List<Token>) {
     val value = expression()
     consume(SEMICOLON, "Expect ';' after value.")
     return Print(value)
+  }
+
+  private fun whileStatement(): Stmt {
+    consume(LEFT_PAREN, "Expect '(' after 'while'.")
+    val condition = expression()
+    consume(RIGHT_PAREN, "Expect ')' after condition.")
+    val body = statement()
+
+    return While(condition, body)
   }
 
   private fun expressionStatement(): Stmt {
