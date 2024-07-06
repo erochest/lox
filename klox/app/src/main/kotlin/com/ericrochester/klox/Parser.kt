@@ -13,6 +13,7 @@ private val logger = KotlinLogging.logger {}
 //                | statement ;
 //
 // statement      → exprStmt
+//                | forStmt
 //                | ifStmt
 //                | printStmt
 //                | whileStmt
@@ -22,6 +23,9 @@ private val logger = KotlinLogging.logger {}
 //
 // varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 // exprStmt       → expression ";" ;
+// forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
+//                  expression? ";"
+//                  expression? ")" statement ;
 // ifStmt         → "if" "(" expression ")" statement
 //                ( "else" statement )? ;
 // printStmt      → "print" expression ";" ;
@@ -74,6 +78,7 @@ class Parser(private val tokens: List<Token>) {
     if (match(WHILE)) return whileStatement()
     if (match(LEFT_BRACE)) return Block(block())
     if (match(IF)) return ifStatement()
+    if (match(FOR)) return forStatement()
     return expressionStatement()
   }
 
@@ -120,6 +125,36 @@ class Parser(private val tokens: List<Token>) {
       elseBranch = statement()
     }
     return If(condition, thenBranch, elseBranch)
+  }
+
+  private fun forStatement(): Stmt {
+    consume(LEFT_PAREN, "Expect '(' after 'for'.")
+
+    val initializer: Stmt? = if (match(SEMICOLON)) {
+      null
+    } else if (match(VAR)) {
+      varDeclaration()
+    } else {
+      expressionStatement()
+    }
+
+    val condition = if (!check(SEMICOLON)) expression() else null
+    consume(SEMICOLON, "Expect ';' after loop condition.")
+
+    val increment = if (!check(RIGHT_PAREN)) expression() else null
+    consume(RIGHT_PAREN, "Expect ')' after for clauses.")
+
+    var body = statement()
+
+    increment?.let {
+      body = Block(listOf(body, Expression(it)))
+    }
+    body = While(condition ?: Literal(true), body)
+    initializer?.let {
+      body = Block(listOf(it, body))
+    }
+
+    return body
   }
 
   private fun varDeclaration(): Stmt {
