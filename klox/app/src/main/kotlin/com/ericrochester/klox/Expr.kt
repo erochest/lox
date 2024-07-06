@@ -8,10 +8,10 @@ abstract class Expr {
 
 interface ExprVisitor<R> {
     fun visitAssignExpr(assignExpr: Assign): R
-    fun visitTernaryExpr(ternaryExpr: Ternary): R
     fun visitBinaryExpr(binaryExpr: Binary): R
     fun visitGroupingExpr(groupingExpr: Grouping): R
     fun visitLiteralExpr(literalExpr: Literal): R
+    fun visitLogicalExpr(logicalExpr: Logical): R
     fun visitUnaryExpr(unaryExpr: Unary): R
     fun visitVariableExpr(variableExpr: Variable): R
 }
@@ -22,16 +22,6 @@ data class Assign(
 ) : Expr() {
     override fun <R> accept(visitor: ExprVisitor<R>): R {
         return visitor.visitAssignExpr(this)
-    }
-}
-
-data class Ternary(
-    val condition: Expr,
-    val thenBranch: Expr,
-    val elseBranch: Expr,
-) : Expr() {
-    override fun <R> accept(visitor: ExprVisitor<R>): R {
-        return visitor.visitTernaryExpr(this)
     }
 }
 
@@ -58,6 +48,16 @@ data class Literal(
 ) : Expr() {
     override fun <R> accept(visitor: ExprVisitor<R>): R {
         return visitor.visitLiteralExpr(this)
+    }
+}
+
+data class Logical(
+    val left: Expr,
+    val operator: Token,
+    val right: Expr,
+) : Expr() {
+    override fun <R> accept(visitor: ExprVisitor<R>): R {
+        return visitor.visitLogicalExpr(this)
     }
 }
 

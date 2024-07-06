@@ -17,15 +17,15 @@ class AstPrinter : ExprVisitor<String> {
     return literalExpr.value?.toString() ?: "nil"
   }
 
+  override fun visitLogicalExpr(logicalExpr: Logical): String {
+    return rpn(logicalExpr.left, logicalExpr.right, logicalExpr.operator.lexeme)
+  }
+
   override fun visitUnaryExpr(unaryExpr: Unary): String {
     return rpn(
         unaryExpr.right,
         unaryExpr.operator.lexeme
     ) // Unary operations in RPN place the operator after the operand
-  }
-
-  override fun visitTernaryExpr(ternaryExpr: Ternary): String {
-    return rpn(ternaryExpr.condition, ternaryExpr.thenBranch, ternaryExpr.elseBranch, "?:")
   }
 
   override fun visitAssignExpr(assignExpr: Assign): String {

@@ -26,9 +26,9 @@ private val logger = KotlinLogging.logger {}
 // printStmt      → "print" expression ";" ;
 // expression     → assignment ;
 // assignment     → IDENTIFIER "=" assignment
-//                | ternary
-//                | ( "," | "?" | "!=" | "==" | ">" | ">=" | "<" | "<=" | "+" | "/" | "*" ) ;
-// ternary        → equality ( "?" expression ":" expression )? ;
+//                | logic_or ;
+// logic_or       → lagic_and ( "or" logic_and )* ;
+// logic_and      → equality ( "or" equality )* ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 // comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 // term           → factor ( ( "-" | "+" ) factor )* ;
@@ -145,7 +145,7 @@ class Parser(private val tokens: List<Token>) {
   }
 
   private fun assignment(): Expr {
-    val expr = ternary()
+    val expr = or()
 
     if (match(EQUAL)) {
       val equals = previous()
@@ -161,15 +161,25 @@ class Parser(private val tokens: List<Token>) {
     return expr
   }
 
-  private fun ternary(): Expr {
-    logger.debug { "Parsing ternary: " + peek().toString() }
-    val expr = equality()
+  private fun or(): Expr {
+    var expr = and()
 
-    if (match(QUESTION)) {
-      val then = expression()
-      consume(COLON, "Expect ':' after '?'.")
-      val alternative = expression()
-      return Ternary(expr, then, alternative)
+    while (match(OR)) {
+      val operator = previous()
+      val right = and()
+      expr = Logical(expr, operator, right)
+    }
+
+    return expr
+  }
+
+  private fun and(): Expr {
+    var expr = equality()
+
+    while (match(AND)) {
+      val operator = previous()
+      val right = equality()
+      expr = Logical(expr, operator, right)
     }
 
     return expr

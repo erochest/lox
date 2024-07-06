@@ -21,6 +21,16 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     return literalExpr.value
   }
 
+  override fun visitLogicalExpr(logicalExpr: Logical): Any? {
+    val left = evaluate(logicalExpr.left)
+    if (logicalExpr.operator.type == TokenType.OR) {
+      if (isTruthy(left)) return left
+    } else {
+      if (!isTruthy(left)) return left
+    }
+    return evaluate(logicalExpr.right)
+  }
+
   override fun visitGroupingExpr(groupingExpr: Grouping): Any? {
     return evaluate(groupingExpr.expression)
   }
@@ -93,12 +103,6 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
               "Unknown binary operator: ${binaryExpr.operator.lexeme}"
           )
     }
-  }
-
-  override fun visitTernaryExpr(ternaryExpr: Ternary): Any? {
-    val condition = evaluate(ternaryExpr.condition)
-    return if (isTruthy(condition)) evaluate(ternaryExpr.thenBranch)
-    else evaluate(ternaryExpr.elseBranch)
   }
 
   override fun visitVariableExpr(variableExpr: Variable): Any? {
