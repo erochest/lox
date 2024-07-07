@@ -105,6 +105,19 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     }
   }
 
+  override fun visitCallExpr(callExpr: Call): Any? {
+    val callee = evaluate(callExpr.callee)
+    val arguments = callExpr.arguments.map { evaluate(it) }
+
+    val function =
+        callee as? LoxCallable
+            ?: throw RuntimeError(callExpr.paren, "Can only call functions and classes.")
+    if (arguments.size != function.arity())
+      throw RuntimeError(callExpr.paren, "Expected ${function.arity()} arguments but got ${arguments.size}.")
+          
+    return function.call(this, arguments)
+  }
+
   override fun visitVariableExpr(variableExpr: Variable): Any? {
     return environment.get(variableExpr.name)
   }
@@ -134,6 +147,7 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
   }
 
   override fun visitWhileStmt(whileStmt: While) {
+    // TODO: break statement
     while (isTruthy(evaluate(whileStmt.condition))) {
       execute(whileStmt.body)
     }

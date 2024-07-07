@@ -9,6 +9,16 @@ class AstPrinter : ExprVisitor<String> {
     return rpn(binaryExpr.left, binaryExpr.right, binaryExpr.operator.lexeme)
   }
 
+  override fun visitCallExpr(callExpr: Call): String {
+    val buffer = StringBuffer()
+
+    buffer.append(callExpr.arguments.joinToString(" ") { it.accept(this) })
+    buffer.append(" ")
+    buffer.append(callExpr.callee.accept(this))
+
+    return buffer.toString()
+  }
+
   override fun visitGroupingExpr(groupingExpr: Grouping): String {
     return groupingExpr.expression.accept(this) // groupingExpr does not affect RPN notation
   }

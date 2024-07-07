@@ -40,7 +40,9 @@ private val logger = KotlinLogging.logger {}
 // term           → factor ( ( "-" | "+" ) factor )* ;
 // factor         → unary ( ( "/" | "*" ) unary )* ;
 // unary          → ( "!" | "-" ) unary
-//                | primary ;
+//                | call ;
+// call           → primary ( "(" arguments? ")" )* ;
+// arguments      → expression ( "," expression )* ;
 // primary        → NUMBER | STRING | "true" | "false" | "nil"
 //                | "(" expression ")"
 //                | IDENTIFIER ;
@@ -130,13 +132,14 @@ class Parser(private val tokens: List<Token>) {
   private fun forStatement(): Stmt {
     consume(LEFT_PAREN, "Expect '(' after 'for'.")
 
-    val initializer: Stmt? = if (match(SEMICOLON)) {
-      null
-    } else if (match(VAR)) {
-      varDeclaration()
-    } else {
-      expressionStatement()
-    }
+    val initializer: Stmt? =
+        if (match(SEMICOLON)) {
+          null
+        } else if (match(VAR)) {
+          varDeclaration()
+        } else {
+          expressionStatement()
+        }
 
     val condition = if (!check(SEMICOLON)) expression() else null
     consume(SEMICOLON, "Expect ';' after loop condition.")
@@ -146,13 +149,9 @@ class Parser(private val tokens: List<Token>) {
 
     var body = statement()
 
-    increment?.let {
-      body = Block(listOf(body, Expression(it)))
-    }
+    increment?.let { body = Block(listOf(body, Expression(it))) }
     body = While(condition ?: Literal(true), body)
-    initializer?.let {
-      body = Block(listOf(it, body))
-    }
+    initializer?.let { body = Block(listOf(it, body)) }
 
     return body
   }
@@ -259,7 +258,39 @@ class Parser(private val tokens: List<Token>) {
       val right = unary()
       return Unary(op, right)
     }
-    return primary()
+    return call()
+  }
+
+  private fun call(): Expr {
+    var expr = primary()
+
+    while (true) {
+      if (match(LEFT_PAREN)) {
+        expr = finishCall(expr)
+      } else {
+        break
+      }
+    }
+
+    return expr
+  }
+
+  private fun finishCall(callee: Expr): Expr {
+    val arguments: MutableList<Expr> = mutableListOf()
+
+    if (!check(RIGHT_PAREN)) {
+      do {
+        if (arguments.size >= 255) {
+          error(peek(), "Cannot have more than 255 arguments.")
+        }
+        arguments.add(expression())
+      } while (match(COMMA))
+      // TODO: this doesn't handle trailing commas
+    }
+
+    val paren = consume(RIGHT_PAREN, "Expect ')' after arguments.")
+
+    return Call(callee, paren, arguments)
   }
 
   private fun primary(): Expr {
