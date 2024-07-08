@@ -3,7 +3,17 @@ package com.ericrochester.klox
 import com.ericrochester.klox.app.runtimeError
 
 class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
-  var environment = Environment()
+  val globals = Environment()
+  var environment = globals
+
+  init {
+    globals.define("clock", object: LoxCallable {
+      override fun arity(): Int = 0
+      override fun call(Interpreter: Interpreter, arguments: List<Any?>): Any? =
+      System.currentTimeMillis().toDouble() / 1000.0
+      override fun toString(): String = "<native fun>"
+    })
+  }
 
   fun interpret(statements: List<Stmt?>) {
     try {
