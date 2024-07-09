@@ -7,12 +7,15 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
   var environment = globals
 
   init {
-    globals.define("clock", object: LoxCallable {
-      override fun arity(): Int = 0
-      override fun call(Interpreter: Interpreter, arguments: List<Any?>): Any? =
-      System.currentTimeMillis().toDouble() / 1000.0
-      override fun toString(): String = "<native fun>"
-    })
+    globals.define(
+        "clock",
+        object : LoxCallable {
+          override fun arity(): Int = 0
+          override fun call(interpreter: Interpreter, arguments: List<Any?>): Any? =
+              System.currentTimeMillis().toDouble() / 1000.0
+          override fun toString(): String = "<native fun>"
+        }
+    )
   }
 
   fun interpret(statements: List<Stmt?>) {
@@ -123,8 +126,11 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
         callee as? LoxCallable
             ?: throw RuntimeError(callExpr.paren, "Can only call functions and classes.")
     if (arguments.size != function.arity())
-      throw RuntimeError(callExpr.paren, "Expected ${function.arity()} arguments but got ${arguments.size}.")
-          
+        throw RuntimeError(
+            callExpr.paren,
+            "Expected ${function.arity()} arguments but got ${arguments.size}."
+        )
+
     return function.call(this, arguments)
   }
 
@@ -136,6 +142,11 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
 
   override fun visitExpressionStmt(expressionStmt: Expression) {
     evaluate(expressionStmt.expression)
+  }
+
+  override fun visitFunctionStmt(functionStmt: Function) {
+    val function = LoxFunction(functionStmt)
+    environment.define(functionStmt.name.lexeme, function)
   }
 
   override fun visitIfStmt(ifStmt: If) {
@@ -179,7 +190,7 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     stmt.accept(this)
   }
 
-  private fun executeBlock(statements: List<Stmt?>, environment: Environment) {
+  fun executeBlock(statements: List<Stmt?>, environment: Environment) {
     val previous = this.environment
 
     try {

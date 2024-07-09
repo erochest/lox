@@ -9,7 +9,8 @@ private val logger = KotlinLogging.logger {}
 // The parser so far.
 // program        → declaration* EOF ;
 //
-// declaration    → varDecl
+// declaration    → funDecl
+//                | varDecl
 //                | statement ;
 //
 // statement      → exprStmt
@@ -21,6 +22,9 @@ private val logger = KotlinLogging.logger {}
 //
 // block          → "{" declaration* "}" ;
 //
+// funDecl        → "fun" function ;
+// function       → IDENTIFIER "(" parameters? ")" block ;
+// parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
 // varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 // exprStmt       → expression ";" ;
 // forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
@@ -67,6 +71,7 @@ class Parser(private val tokens: List<Token>) {
   // Productions
   private fun declaration(): Stmt? {
     try {
+      if (match(FUN)) return function("function")
       if (match(VAR)) return varDeclaration()
       return statement()
     } catch (error: ParseError) {
@@ -103,6 +108,28 @@ class Parser(private val tokens: List<Token>) {
     val value = expression()
     consume(SEMICOLON, "Expect ';' after expression.")
     return Expression(value)
+  }
+
+  private fun function(kind: String): Function {
+    val name = consume(IDENTIFIER, "Expect $kind name.")
+    val parameters: MutableList<Token> = mutableListOf()
+
+    consume(LEFT_PAREN, "Expect '(' after $kind name.")
+    if (!check(RIGHT_PAREN)) {
+      do {
+        if (parameters.size >= 255) {
+          error(peek(), "Cannot have more than 255 parameters.")
+        }
+
+        parameters.add(consume(IDENTIFIER, "Expect parameter name."))
+      } while (match(COMMA))
+    }
+    consume(RIGHT_PAREN, "Expect ')' after parameters")
+
+    consume(LEFT_BRACE, "Expect '{' before $kind body.")
+    val body = block().filterNotNull()
+
+    return Function(name, parameters, body)
   }
 
   private fun block(): List<Stmt?> {
