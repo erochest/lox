@@ -17,6 +17,7 @@ private val logger = KotlinLogging.logger {}
 //                | forStmt
 //                | ifStmt
 //                | printStmt
+//                | returnStmt
 //                | whileStmt
 //                | block ;
 //
@@ -33,6 +34,7 @@ private val logger = KotlinLogging.logger {}
 // ifStmt         → "if" "(" expression ")" statement
 //                ( "else" statement )? ;
 // printStmt      → "print" expression ";" ;
+// returnStmt     → "return" expression ";" ;
 // whileStmt      → "while" "(" expression ")" statement ;
 // expression     → assignment ;
 // assignment     → IDENTIFIER "=" assignment
@@ -82,6 +84,7 @@ class Parser(private val tokens: List<Token>) {
 
   private fun statement(): Stmt {
     if (match(PRINT)) return printStatement()
+    if (match(RETURN)) return returnStatement()
     if (match(WHILE)) return whileStatement()
     if (match(LEFT_BRACE)) return Block(block())
     if (match(IF)) return ifStatement()
@@ -93,6 +96,18 @@ class Parser(private val tokens: List<Token>) {
     val value = expression()
     consume(SEMICOLON, "Expect ';' after value.")
     return Print(value)
+  }
+
+  private fun returnStatement(): Stmt {
+    val keyword = previous()
+    var value: Expr? = null
+
+    if (!check(SEMICOLON)) {
+      value = expression()
+    }
+
+    consume(SEMICOLON, "Expect ';' after a return value.")
+    return ReturnStmt(keyword, value)
   }
 
   private fun whileStatement(): Stmt {

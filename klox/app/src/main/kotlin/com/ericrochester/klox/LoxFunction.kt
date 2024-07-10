@@ -9,7 +9,11 @@ class LoxFunction(val declaration: Function) : LoxCallable {
       environment.define(param.lexeme, arguments[index])
     }
 
-    interpreter.executeBlock(declaration.body, environment)
+    try {
+      interpreter.executeBlock(declaration.body, environment)
+    } catch (returnValue: Return) {
+      return returnValue.value
+    }
     return null
   }
 

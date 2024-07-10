@@ -12,6 +12,7 @@ interface StmtVisitor<R> {
     fun visitFunctionStmt(functionStmt: Function): R
     fun visitIfStmt(ifStmt: If): R
     fun visitPrintStmt(printStmt: Print): R
+    fun visitReturnStmtStmt(returnstmtStmt: ReturnStmt): R
     fun visitVarStmt(varStmt: Var): R
     fun visitWhileStmt(whileStmt: While): R
 }
@@ -57,6 +58,15 @@ data class Print(
 ) : Stmt() {
     override fun <R> accept(visitor: StmtVisitor<R>): R {
         return visitor.visitPrintStmt(this)
+    }
+}
+
+data class ReturnStmt(
+    val keyword: Token,
+    val value: Expr?,
+) : Stmt() {
+    override fun <R> accept(visitor: StmtVisitor<R>): R {
+        return visitor.visitReturnStmtStmt(this)
     }
 }
 
