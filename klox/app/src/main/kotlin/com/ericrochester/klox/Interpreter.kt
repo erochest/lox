@@ -145,7 +145,7 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
   }
 
   override fun visitFunctionStmt(functionStmt: Function) {
-    val function = LoxFunction(functionStmt)
+    val function = LoxFunction(functionStmt, environment)
     environment.define(functionStmt.name.lexeme, function)
   }
 
