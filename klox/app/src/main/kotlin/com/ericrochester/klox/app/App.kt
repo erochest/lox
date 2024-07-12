@@ -16,6 +16,7 @@ import com.ericrochester.klox.TokenType
 import com.ericrochester.klox.Parser
 import com.ericrochester.klox.Interpreter
 import com.ericrochester.klox.RuntimeError
+import com.ericrochester.klox.Resolver
 
 val interpreter: Interpreter = Interpreter()
 
@@ -54,12 +55,12 @@ private fun runPrompt() {
 }
 
 private fun run(source: String) {
-    val scanner = Scanner(source)
-    val tokens = scanner.scanTokens()
-    val parser = Parser(tokens)
-    val statements = parser.parse()
+    val tokens = Scanner(source).scanTokens()
+    val statements = Parser(tokens).parse()
 
     if (hadError) return
+
+    Resolver(interpreter).resolve(statements.filterNotNull())
 
     interpreter.interpret(statements)
 }

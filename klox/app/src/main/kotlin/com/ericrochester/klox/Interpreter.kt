@@ -4,6 +4,7 @@ import com.ericrochester.klox.app.runtimeError
 
 class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
   val globals = Environment()
+  val locals = mutableMapOf<Expr, Int>()
   var environment = globals
 
   init {
@@ -135,7 +136,7 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
   }
 
   override fun visitVariableExpr(variableExpr: Variable): Any? {
-    return environment.get(variableExpr.name)
+    return lookupVariable(variableExpr.name, variableExpr)
   }
 
   // Statement visitor
@@ -181,7 +182,14 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
 
   override fun visitAssignExpr(assignExpr: Assign): Any? {
     val value = evaluate(assignExpr.value)
-    environment.assign(assignExpr.name, value)
+
+    val distance = locals[assignExpr]
+    if (distance != null) {
+      environment.assignAt(distance, assignExpr.name, value)
+    } else {
+      globals.assign(assignExpr.name, value)
+    }
+
     return value
   }
 
@@ -206,6 +214,19 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
       }
     } finally {
       this.environment = previous
+    }
+  }
+
+  fun resolve(expr: Expr, depth: Int) {
+    locals[expr] = depth
+  }
+
+  fun lookupVariable(name: Token, expr: Expr): Any? {
+    val distance = locals[expr]
+    if (distance != null) {
+      return environment.getAt(distance, name.lexeme)
+    } else {
+      return globals.get(name)
     }
   }
 
