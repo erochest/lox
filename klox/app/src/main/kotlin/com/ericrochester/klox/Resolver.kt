@@ -1,12 +1,17 @@
 package com.ericrochester.klox
 
+import com.ericrochester.klox.app.error as loxError
 import kotlin.collections.ArrayDeque
 
-import com.ericrochester.klox.app.error as loxError
-
 class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Unit> {
-  
+
+  private enum class FunctionType {
+    NONE,
+    FUNCTION
+  }
+
   private val scopes = ArrayDeque<MutableMap<String, Boolean>>()
+  private var currentFunctionType = FunctionType.NONE
 
   // Helpers
 
@@ -33,6 +38,9 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   private fun declare(name: Token) {
     if (scopes.isEmpty()) return
     val scope = scopes.last()
+    if (scope.containsKey(name.lexeme)) {
+      loxError(name, "Already a variable with this name in this scope.")
+    }
     scope[name.lexeme] = false
   }
 
@@ -42,7 +50,10 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     scope[name.lexeme] = true
   }
 
-  private fun resolveFunction(function: Function) {
+  private fun resolveFunction(function: Function, type: FunctionType) {
+    val enclosingFunctionType = currentFunctionType
+    currentFunctionType = type
+
     beginScope()
     function.params.forEach {
       declare(it)
@@ -50,6 +61,7 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     }
     resolve(function.body)
     endScope()
+    currentFunctionType = enclosingFunctionType
   }
 
   private fun resolveLocal(expr: Expr, name: Token) {
@@ -72,8 +84,8 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   override fun visitFunctionStmt(functionStmt: Function) {
     declare(functionStmt.name)
     define(functionStmt.name)
-    
-    resolveFunction(functionStmt)
+
+    resolveFunction(functionStmt, FunctionType.FUNCTION)
   }
 
   override fun visitVarStmt(varStmt: Var) {
@@ -89,17 +101,18 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   override fun visitIfStmt(ifStmt: If) {
     resolve(ifStmt.condition)
     resolve(ifStmt.thenBranch)
-    ifStmt.elseBranch?.let {
-      resolve(it)
-    }
+    ifStmt.elseBranch?.let { resolve(it) }
   }
 
   override fun visitPrintStmt(printStmt: Print) {
     resolve(printStmt.expression)
   }
 
-  override fun visitReturnStmtStmt(returnStmtStmt: ReturnStmt) {
-    returnStmtStmt.value?.let { resolve(it) }
+  override fun visitReturnStmtStmt(returnstmtStmt: ReturnStmt) {
+    if (currentFunctionType == FunctionType.NONE) {
+      loxError(returnstmtStmt.keyword, "Can't return from top-level code.")
+    }
+    returnstmtStmt.value?.let { resolve(it) }
   }
 
   override fun visitWhileStmt(whileStmt: While) {
@@ -115,7 +128,7 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   }
 
   override fun visitVariableExpr(variableExpr: Variable) {
-    if (!scopes.isEmpty() && (scopes.last()[variableExpr.name.lexeme] ?: false) == false) {
+    if (!scopes.isEmpty() && scopes.last()[variableExpr.name.lexeme] == false) {
       loxError(variableExpr.name, "Can't read local variable in its own initializer.")
     }
 
@@ -136,8 +149,7 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     resolve(groupingExpr.expression)
   }
 
-  override fun visitLiteralExpr(literalExpr: Literal) {
-  }
+  override fun visitLiteralExpr(literalExpr: Literal) {}
 
   override fun visitLogicalExpr(logicalExpr: Logical) {
     resolve(logicalExpr.left)
@@ -147,5 +159,4 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   override fun visitUnaryExpr(unaryExpr: Unary) {
     resolve(unaryExpr.right)
   }
-
 }
