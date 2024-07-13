@@ -21,6 +21,7 @@ fun main(args: Array<String>) {
           "Grouping : Expr expression",
           "Literal  : Any? value",
           "Logical  : Expr left, Token operator, Expr right",
+          "Set      : Expr obj, Token name, Expr value",
           "Unary    : Token operator, Expr right",
           "Variable : Token name",
       )

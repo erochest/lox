@@ -14,6 +14,7 @@ interface ExprVisitor<R> {
     fun visitGroupingExpr(groupingExpr: Grouping): R
     fun visitLiteralExpr(literalExpr: Literal): R
     fun visitLogicalExpr(logicalExpr: Logical): R
+    fun visitSetExpr(setExpr: Set): R
     fun visitUnaryExpr(unaryExpr: Unary): R
     fun visitVariableExpr(variableExpr: Variable): R
 }
@@ -79,6 +80,16 @@ data class Logical(
 ) : Expr() {
     override fun <R> accept(visitor: ExprVisitor<R>): R {
         return visitor.visitLogicalExpr(this)
+    }
+}
+
+data class Set(
+    val obj: Expr,
+    val name: Token,
+    val value: Expr,
+) : Expr() {
+    override fun <R> accept(visitor: ExprVisitor<R>): R {
+        return visitor.visitSetExpr(this)
     }
 }
 

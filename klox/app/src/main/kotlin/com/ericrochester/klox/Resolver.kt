@@ -165,6 +165,11 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     resolve(logicalExpr.right)
   }
 
+  override fun visitSetExpr(setExpr: Set) {
+    resolve(setExpr.value)
+    resolve(setExpr.obj)
+  }
+
   override fun visitUnaryExpr(unaryExpr: Unary) {
     resolve(unaryExpr.right)
   }

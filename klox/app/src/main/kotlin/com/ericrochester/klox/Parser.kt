@@ -39,7 +39,7 @@ private val logger = KotlinLogging.logger {}
 // returnStmt     → "return" expression ";" ;
 // whileStmt      → "while" "(" expression ")" statement ;
 // expression     → assignment ;
-// assignment     → IDENTIFIER "=" assignment
+// assignment     → (call "." )? IDENTIFIER "=" assignment
 //                | logic_or ;
 // logic_or       → lagic_and ( "or" logic_and )* ;
 // logic_and      → equality ( "or" equality )* ;
@@ -258,6 +258,8 @@ class Parser(private val tokens: List<Token>) {
       if (expr is Variable) {
         val name = expr.name
         return Assign(name, value)
+      } else if (expr is Get) {
+        return Set(expr.obj, expr.name, value)
       }
       throw error(equals, "Invalid assignment target.")
     }

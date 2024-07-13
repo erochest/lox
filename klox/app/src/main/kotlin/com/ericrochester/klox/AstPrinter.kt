@@ -35,6 +35,10 @@ class AstPrinter : ExprVisitor<String> {
     return rpn(logicalExpr.left, logicalExpr.right, logicalExpr.operator.lexeme)
   }
 
+  override fun visitSetExpr(setExpr: Set): String {
+    return rpn(setExpr.obj, setExpr.name.lexeme, setExpr.value, '=')
+  }
+
   override fun visitUnaryExpr(unaryExpr: Unary): String {
     return rpn(
         unaryExpr.right,

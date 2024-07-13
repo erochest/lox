@@ -45,6 +45,14 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     return evaluate(logicalExpr.right)
   }
 
+  override fun visitSetExpr(setExpr: Set): Any? {
+    val obj = evaluate(setExpr.obj) as? LoxInstance
+        ?: throw RuntimeError(setExpr.name, "Only instances have fields.")
+    val value = evaluate(setExpr.value)
+    obj.set(setExpr.name, value)
+    return value
+  }
+
   override fun visitGroupingExpr(groupingExpr: Grouping): Any? {
     return evaluate(groupingExpr.expression)
   }
