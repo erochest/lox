@@ -5,26 +5,28 @@ build:
 repl:
     ./gradlew :app:run --quiet --console=plain
 
-script script_file:
+run script_file:
     ./gradlew :app:run --args="{{invocation_directory()}}/{{script_file}}" --quiet --console=plain
 
-all-scripts:
+run-all:
+    echo "\nCLASS_SCRIPT"
+    just run scripts/classScript.lox
     echo "\nCOUNTER"
-    just script scripts/counter.lox
+    just run scripts/counter.lox
     echo "\nENVIRONMENTS"
-    just script scripts/environments.lox
+    just run scripts/environments.lox
     echo "\nFIB"
-    just script scripts/fib.lox
+    just run scripts/fib.lox
     echo "\nLOOPS"
-    just script scripts/loops.lox
+    just run scripts/loops.lox
     echo "\nPRINT_THINGS"
-    just script scripts/print_things.lox
+    just run scripts/print_things.lox
     echo "\nSAYHI"
-    just script scripts/sayhi.lox
+    just run scripts/sayhi.lox
     echo "\nSCOPING"
-    just script scripts/scoping.lox
+    just run scripts/scoping.lox
     echo "\nVARIABLES"
-    just script scripts/variables.lox
+    just run scripts/variables.lox
 
 gen-ast: 
     ./gradlew :tools:run --args="{{invocation_directory()}}/app/src/main/kotlin/com/ericrochester/klox" --quiet --console=plain

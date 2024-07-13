@@ -174,7 +174,6 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
   }
 
   override fun visitWhileStmt(whileStmt: While) {
-    // TODO: break statement
     while (isTruthy(evaluate(whileStmt.condition))) {
       execute(whileStmt.body)
     }
@@ -195,6 +194,12 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
 
   override fun visitBlockStmt(blockStmt: Block) {
     executeBlock(blockStmt.statements, Environment(environment))
+  }
+
+  override fun visitClassStmtStmt(classstmtStmt: ClassStmt) {
+    environment.define(classstmtStmt.name.lexeme, null)
+    val klass = LoxClass(classstmtStmt.name.lexeme)
+    environment.assign(classstmtStmt.name, klass)
   }
 
   // Helpers

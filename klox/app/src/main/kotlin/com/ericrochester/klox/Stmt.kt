@@ -8,6 +8,7 @@ abstract class Stmt {
 
 interface StmtVisitor<R> {
     fun visitBlockStmt(blockStmt: Block): R
+    fun visitClassStmtStmt(classstmtStmt: ClassStmt): R
     fun visitExpressionStmt(expressionStmt: Expression): R
     fun visitFunctionStmt(functionStmt: Function): R
     fun visitIfStmt(ifStmt: If): R
@@ -22,6 +23,15 @@ data class Block(
 ) : Stmt() {
     override fun <R> accept(visitor: StmtVisitor<R>): R {
         return visitor.visitBlockStmt(this)
+    }
+}
+
+data class ClassStmt(
+    val name: Token,
+    val methods: List<Function>,
+) : Stmt() {
+    override fun <R> accept(visitor: StmtVisitor<R>): R {
+        return visitor.visitClassStmtStmt(this)
     }
 }
 

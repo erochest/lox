@@ -81,6 +81,11 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     endScope()
   }
 
+  override fun visitClassStmtStmt(classstmtStmt: ClassStmt) {
+    declare(classstmtStmt.name)
+    define(classstmtStmt.name)
+  }
+
   override fun visitFunctionStmt(functionStmt: Function) {
     declare(functionStmt.name)
     define(functionStmt.name)

@@ -9,7 +9,8 @@ private val logger = KotlinLogging.logger {}
 // The parser so far.
 // program        → declaration* EOF ;
 //
-// declaration    → funDecl
+// declaration    → classDecl
+//                | funDecl
 //                | varDecl
 //                | statement ;
 //
@@ -23,6 +24,7 @@ private val logger = KotlinLogging.logger {}
 //
 // block          → "{" declaration* "}" ;
 //
+// classDecl      → "class" IDENTIFIER "{" function* "}" ;
 // funDecl        → "fun" function ;
 // function       → IDENTIFIER "(" parameters? ")" block ;
 // parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
@@ -73,6 +75,7 @@ class Parser(private val tokens: List<Token>) {
   // Productions
   private fun declaration(): Stmt? {
     try {
+      if (match(CLASS)) return classDeclaration()
       if (match(FUN)) return function("function")
       if (match(VAR)) return varDeclaration()
       return statement()
@@ -80,6 +83,19 @@ class Parser(private val tokens: List<Token>) {
       synchronize()
       return null
     }
+  }
+
+  private fun classDeclaration(): Stmt {
+    val name = consume(IDENTIFIER, "Expect class name.")
+    consume(LEFT_BRACE, "Expect '{' before class body.")
+    val methods = mutableListOf<Function>()
+
+    while (!check(RIGHT_BRACE) && !isAtEnd()) {
+      methods.add(function("method"))
+    }
+
+    consume(RIGHT_BRACE, "Expect '}' after class body.")
+    return ClassStmt(name, methods)
   }
 
   private fun statement(): Stmt {

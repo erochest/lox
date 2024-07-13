@@ -29,6 +29,7 @@ fun main(args: Array<String>) {
       "Stmt",
       listOf(
           "Block      : List<Stmt?> statements",
+          "ClassStmt  : Token name, List<Function> methods",
           "Expression : Expr expression",
           "Function   : Token name, List<Token> params, List<Stmt> body",
           "If         : Expr condition, Stmt thenBranch, Stmt? elseBranch",
