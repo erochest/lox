@@ -49,7 +49,7 @@ private val logger = KotlinLogging.logger {}
 // factor         → unary ( ( "/" | "*" ) unary )* ;
 // unary          → ( "!" | "-" ) unary
 //                | call ;
-// call           → primary ( "(" arguments? ")" )* ;
+// call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 // arguments      → expression ( "," expression )* ;
 // primary        → NUMBER | STRING | "true" | "false" | "nil"
 //                | "(" expression ")"
@@ -325,6 +325,9 @@ class Parser(private val tokens: List<Token>) {
     while (true) {
       if (match(LEFT_PAREN)) {
         expr = finishCall(expr)
+      } else if (match(DOT)) {
+        val name = consume(IDENTIFIER, "Expect property name after '.'.")
+        expr = Get(expr, name)
       } else {
         break
       }

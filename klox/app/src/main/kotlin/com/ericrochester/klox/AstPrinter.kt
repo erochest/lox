@@ -19,6 +19,10 @@ class AstPrinter : ExprVisitor<String> {
     return buffer.toString()
   }
 
+  override fun visitGetExpr(getExpr: Get): String {
+    return rpn(getExpr.obj, getExpr.name.lexeme, '.')
+  }
+
   override fun visitGroupingExpr(groupingExpr: Grouping): String {
     return groupingExpr.expression.accept(this) // groupingExpr does not affect RPN notation
   }

@@ -135,6 +135,14 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     return function.call(this, arguments)
   }
 
+  override fun visitGetExpr(getExpr: Get): Any? {
+    val obj = evaluate(getExpr.obj)
+    if (obj is LoxInstance) {
+      return obj.get(getExpr.name)
+    }
+    throw RuntimeError(getExpr.name, "Only instances have properties.")
+  }
+
   override fun visitVariableExpr(variableExpr: Variable): Any? {
     return lookupVariable(variableExpr.name, variableExpr)
   }

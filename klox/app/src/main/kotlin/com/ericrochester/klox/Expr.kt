@@ -10,6 +10,7 @@ interface ExprVisitor<R> {
     fun visitAssignExpr(assignExpr: Assign): R
     fun visitBinaryExpr(binaryExpr: Binary): R
     fun visitCallExpr(callExpr: Call): R
+    fun visitGetExpr(getExpr: Get): R
     fun visitGroupingExpr(groupingExpr: Grouping): R
     fun visitLiteralExpr(literalExpr: Literal): R
     fun visitLogicalExpr(logicalExpr: Logical): R
@@ -43,6 +44,15 @@ data class Call(
 ) : Expr() {
     override fun <R> accept(visitor: ExprVisitor<R>): R {
         return visitor.visitCallExpr(this)
+    }
+}
+
+data class Get(
+    val obj: Expr,
+    val name: Token,
+) : Expr() {
+    override fun <R> accept(visitor: ExprVisitor<R>): R {
+        return visitor.visitGetExpr(this)
     }
 }
 

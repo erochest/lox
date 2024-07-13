@@ -150,6 +150,10 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     callExpr.arguments.forEach { resolve(it) }
   }
 
+  override fun visitGetExpr(getExpr: Get) {
+    resolve(getExpr.obj)
+  }
+
   override fun visitGroupingExpr(groupingExpr: Grouping) {
     resolve(groupingExpr.expression)
   }
