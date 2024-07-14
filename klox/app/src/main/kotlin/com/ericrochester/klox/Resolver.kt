@@ -11,8 +11,14 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     METHOD,
   }
 
+  private enum class ClassType {
+    NONE,
+    CLASS,
+  }
+
   private val scopes = ArrayDeque<MutableMap<String, Boolean>>()
   private var currentFunctionType = FunctionType.NONE
+  private var currentClassType = ClassType.NONE
 
   // Helpers
 
@@ -83,6 +89,9 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   }
 
   override fun visitClassStmtStmt(classstmtStmt: ClassStmt) {
+    val enclosingClassType = currentClassType
+    currentClassType = ClassType.CLASS
+
     declare(classstmtStmt.name)
     define(classstmtStmt.name)
 
@@ -95,6 +104,7 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     }
 
     endScope()
+    currentClassType = enclosingClassType
   }
 
   override fun visitFunctionStmt(functionStmt: Function) {
@@ -182,6 +192,10 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   }
 
   override fun visitThisExpr(thisExpr: This) {
+    if (currentClassType == ClassType.NONE) {
+      loxError(thisExpr.keyword, "Can't use 'this' outside of a class.")
+      return
+    }
     resolveLocal(thisExpr, thisExpr.keyword)
   }
 
