@@ -7,7 +7,8 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
 
   private enum class FunctionType {
     NONE,
-    FUNCTION
+    FUNCTION,
+    METHOD,
   }
 
   private val scopes = ArrayDeque<MutableMap<String, Boolean>>()
@@ -84,6 +85,11 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   override fun visitClassStmtStmt(classstmtStmt: ClassStmt) {
     declare(classstmtStmt.name)
     define(classstmtStmt.name)
+
+    classstmtStmt.methods.forEach {
+      val declaration = FunctionType.METHOD
+      resolveFunction(it, declaration)
+    }
   }
 
   override fun visitFunctionStmt(functionStmt: Function) {
