@@ -8,6 +8,7 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   private enum class FunctionType {
     NONE,
     FUNCTION,
+    INITIALIZER,
     METHOD,
   }
 
@@ -99,7 +100,7 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     scopes.last()["this"] = true
 
     classstmtStmt.methods.forEach {
-      val declaration = FunctionType.METHOD
+      val declaration = if (it.name.lexeme == "init") FunctionType.INITIALIZER else FunctionType.METHOD
       resolveFunction(it, declaration)
     }
 
@@ -138,7 +139,12 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     if (currentFunctionType == FunctionType.NONE) {
       loxError(returnstmtStmt.keyword, "Can't return from top-level code.")
     }
-    returnstmtStmt.value?.let { resolve(it) }
+    if (returnstmtStmt.value != null) {
+      if (currentFunctionType == FunctionType.INITIALIZER) {
+        loxError(returnstmtStmt.keyword, "Can't return a value from an initializer.")
+      }
+      resolve(returnstmtStmt.value)
+    }
   }
 
   override fun visitWhileStmt(whileStmt: While) {
