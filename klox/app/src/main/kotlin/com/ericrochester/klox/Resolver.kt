@@ -86,10 +86,15 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     declare(classstmtStmt.name)
     define(classstmtStmt.name)
 
+    beginScope()
+    scopes.last()["this"] = true
+
     classstmtStmt.methods.forEach {
       val declaration = FunctionType.METHOD
       resolveFunction(it, declaration)
     }
+
+    endScope()
   }
 
   override fun visitFunctionStmt(functionStmt: Function) {
@@ -174,6 +179,10 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   override fun visitSetExpr(setExpr: Set) {
     resolve(setExpr.value)
     resolve(setExpr.obj)
+  }
+
+  override fun visitThisExpr(thisExpr: This) {
+    resolveLocal(thisExpr, thisExpr.keyword)
   }
 
   override fun visitUnaryExpr(unaryExpr: Unary) {

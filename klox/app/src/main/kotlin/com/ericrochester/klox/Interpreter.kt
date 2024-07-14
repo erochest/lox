@@ -53,6 +53,10 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     return value
   }
 
+  override fun visitThisExpr(thisExpr: This): Any? {
+    return lookupVariable(thisExpr.keyword, thisExpr)
+  }
+
   override fun visitGroupingExpr(groupingExpr: Grouping): Any? {
     return evaluate(groupingExpr.expression)
   }

@@ -39,6 +39,10 @@ class AstPrinter : ExprVisitor<String> {
     return rpn(setExpr.obj, setExpr.name.lexeme, setExpr.value, '=')
   }
 
+  override fun visitThisExpr(thisExpr: This): String {
+    return thisExpr.keyword.lexeme
+  }
+
   override fun visitUnaryExpr(unaryExpr: Unary): String {
     return rpn(
         unaryExpr.right,

@@ -77,7 +77,7 @@ class Scanner(private val source: String) {
             }
             '\n' -> line++
 
-            '\"' -> string()
+            '"' -> string()
 
             else -> {
                 if (isDigit(c)) number()

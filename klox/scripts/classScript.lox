@@ -1,4 +1,6 @@
 
+print "Basic class, no properties, method calls, or instantiation.";
+
 class DevonshireCream {
     serveOn() {
         return "Scones";
@@ -7,11 +9,17 @@ class DevonshireCream {
 
 print DevonshireCream;
 
+print "";
+print "Class instantiation.";
+
 class Bagel {
 }
 
 var bagel = Bagel();
 print bagel;
+
+print "";
+print "Method calls.";
 
 class Bacon {
     eat() {
@@ -21,3 +29,47 @@ class Bacon {
 
 var bacon = Bacon();
 bacon.eat();
+
+print "";
+print "Method closures.";
+
+class Egoist {
+    speak() {
+        print this;
+    }
+}
+
+var egoist = Egoist();
+egoist.speak();
+
+var method = egoist.speak;
+method();
+
+print "";
+print "Properties and closures.";
+
+class Cake {
+    taste() {
+        var adjective = "delicious";
+        print "The " + this.flavor + " cake is " + adjective + "!";
+    }
+}
+
+var cake = Cake();
+cake.flavor = "German chocolate";
+cake.taste();
+
+print "";
+print "Callbacks.";
+
+class Thing {
+    getCallback() {
+        fun local() {
+            print this;
+        }
+        return local;
+    }
+}
+
+var callback = Thing().getCallback();
+callback();

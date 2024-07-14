@@ -17,5 +17,11 @@ class LoxFunction(val declaration: Function, val closure: Environment) : LoxCall
     return null
   }
 
+  fun bind(instance: LoxInstance): LoxFunction {
+    val environment = Environment(closure)
+    environment.define("this", instance)
+    return LoxFunction(declaration, environment)
+  }
+
   override fun toString(): String = "<fn ${declaration.name.lexeme}>"
 }

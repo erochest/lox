@@ -15,6 +15,7 @@ interface ExprVisitor<R> {
     fun visitLiteralExpr(literalExpr: Literal): R
     fun visitLogicalExpr(logicalExpr: Logical): R
     fun visitSetExpr(setExpr: Set): R
+    fun visitThisExpr(thisExpr: This): R
     fun visitUnaryExpr(unaryExpr: Unary): R
     fun visitVariableExpr(variableExpr: Variable): R
 }
@@ -90,6 +91,14 @@ data class Set(
 ) : Expr() {
     override fun <R> accept(visitor: ExprVisitor<R>): R {
         return visitor.visitSetExpr(this)
+    }
+}
+
+data class This(
+    val keyword: Token,
+) : Expr() {
+    override fun <R> accept(visitor: ExprVisitor<R>): R {
+        return visitor.visitThisExpr(this)
     }
 }
 
