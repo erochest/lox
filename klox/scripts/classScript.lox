@@ -73,3 +73,35 @@ class Thing {
 
 var callback = Thing().getCallback();
 callback();
+
+print "";
+print "initializer";
+
+class Foo {
+    init(name) {
+        this.name = name;
+        print this;
+    }
+
+    greet() {
+        print "Greetings, " + this.name;
+    }
+}
+
+Foo("Zaphod").greet();
+
+print Foo("Arthur").init("something");
+
+
+print "";
+print "inheritance";
+
+class Doughnut {
+    cook() {
+        print "Fry until golden";
+    }
+}
+
+class BostonCreme < Doughnut {}
+
+BostonCreme().cook();

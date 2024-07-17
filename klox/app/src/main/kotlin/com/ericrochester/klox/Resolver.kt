@@ -96,6 +96,14 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     declare(classstmtStmt.name)
     define(classstmtStmt.name)
 
+    classstmtStmt.superclass?.let {
+      if (classstmtStmt.name.lexeme == it.name.lexeme) {
+        loxError(it.name, "A class can't inherit from itself.")
+      }
+      // currentClassType = ClassType.CLASS
+      resolve(it)
+    }
+
     beginScope()
     scopes.last()["this"] = true
 

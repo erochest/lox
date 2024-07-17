@@ -1,6 +1,8 @@
 package com.ericrochester.klox
 
-data class LoxClass(val name: String, val methods: Map<String, LoxFunction>) : LoxCallable {
+data class LoxClass(val name: String,
+                    val superclass: LoxClass?,
+                    val methods: Map<String, LoxFunction>) : LoxCallable {
   override fun toString(): String = name
 
   override fun arity(): Int {
@@ -18,6 +20,12 @@ data class LoxClass(val name: String, val methods: Map<String, LoxFunction>) : L
   }
 
   fun findMethod(name: String): LoxFunction? {
-    return methods[name]
+    if (methods.containsKey(name)) {
+      return methods[name]
+    }
+    if (superclass != null) {
+      return superclass.findMethod(name)
+    }
+    return null
   }
 }

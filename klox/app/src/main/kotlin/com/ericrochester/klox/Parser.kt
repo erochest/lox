@@ -24,7 +24,8 @@ private val logger = KotlinLogging.logger {}
 //
 // block          → "{" declaration* "}" ;
 //
-// classDecl      → "class" IDENTIFIER "{" function* "}" ;
+// classDecl      → "class" IDENTIFIER ( "<" INDENTIFIER )?
+//                  "{" function* "}" ;
 // funDecl        → "fun" function ;
 // function       → IDENTIFIER "(" parameters? ")" block ;
 // parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
@@ -87,6 +88,13 @@ class Parser(private val tokens: List<Token>) {
 
   private fun classDeclaration(): Stmt {
     val name = consume(IDENTIFIER, "Expect class name.")
+
+    var superclass: Variable? = null
+    if (match(LESS)) {
+      consume(IDENTIFIER, "Expect superclass name.")
+      superclass = Variable(previous())
+    }
+
     consume(LEFT_BRACE, "Expect '{' before class body.")
     val methods = mutableListOf<Function>()
 
@@ -95,7 +103,7 @@ class Parser(private val tokens: List<Token>) {
     }
 
     consume(RIGHT_BRACE, "Expect '}' after class body.")
-    return ClassStmt(name, methods)
+    return ClassStmt(name, superclass, methods)
   }
 
   private fun statement(): Stmt {

@@ -28,6 +28,7 @@ data class Block(
 
 data class ClassStmt(
     val name: Token,
+    val superclass: Variable?,
     val methods: List<Function>,
 ) : Stmt() {
     override fun <R> accept(visitor: StmtVisitor<R>): R {
