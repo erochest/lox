@@ -102,6 +102,9 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
       }
       // currentClassType = ClassType.CLASS
       resolve(it)
+
+      beginScope()
+      scopes.last()["super"] = true
     }
 
     beginScope()
@@ -113,6 +116,7 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     }
 
     endScope()
+    classstmtStmt.superclass?.let { endScope() }
     currentClassType = enclosingClassType
   }
 
@@ -203,6 +207,10 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   override fun visitSetExpr(setExpr: Set) {
     resolve(setExpr.value)
     resolve(setExpr.obj)
+  }
+
+  override fun visitSuperExpr(superExpr: Super) {
+    resolveLocal(superExpr, superExpr.keyword)
   }
 
   override fun visitThisExpr(thisExpr: This) {

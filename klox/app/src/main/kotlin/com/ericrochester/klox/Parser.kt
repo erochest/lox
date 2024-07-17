@@ -53,8 +53,8 @@ private val logger = KotlinLogging.logger {}
 // call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 // arguments      → expression ( "," expression )* ;
 // primary        → NUMBER | STRING | "true" | "false" | "nil"
-//                | "(" expression ")"
-//                | IDENTIFIER ;
+//                | "(" expression ")" | IDENTIFIER
+//                | "super" "." IDENTIFIER ;
 
 class Parser(private val tokens: List<Token>) {
   private class ParseError : RuntimeException()
@@ -372,6 +372,13 @@ class Parser(private val tokens: List<Token>) {
 
     if (match(NUMBER, STRING)) {
       return Literal(previous().literal)
+    }
+
+    if (match(SUPER)) {
+      val keyword = previous()
+      consume(DOT, "Expect '.' after 'super'.")
+      val method = consume(IDENTIFIER, "Expect superclass method name.")
+      return Super(keyword, method)
     }
 
     if (match(THIS)) return This(previous())
