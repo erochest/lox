@@ -15,6 +15,7 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   private enum class ClassType {
     NONE,
     CLASS,
+    SUBCLASS,
   }
 
   private val scopes = ArrayDeque<MutableMap<String, Boolean>>()
@@ -97,6 +98,7 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     define(classstmtStmt.name)
 
     classstmtStmt.superclass?.let {
+      currentClassType = ClassType.SUBCLASS
       if (classstmtStmt.name.lexeme == it.name.lexeme) {
         loxError(it.name, "A class can't inherit from itself.")
       }
@@ -210,6 +212,12 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
   }
 
   override fun visitSuperExpr(superExpr: Super) {
+    if (currentClassType == ClassType.NONE) {
+      loxError(superExpr.keyword, "Can't use 'super' outside of a class.")
+    } else if (currentClassType != ClassType.SUBCLASS) {
+      loxError(superExpr.keyword, "Can't use 'super' in a class with no superclass.")
+    }
+
     resolveLocal(superExpr, superExpr.keyword)
   }
 
