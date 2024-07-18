@@ -6,6 +6,10 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
+// TODO: comma operator (https://en.wikipedia.org/wiki/Comma_operator)
+// TODO: ternary
+// TODO: error production for each binary operator appearing at the beginning of an expression
+
 // The parser so far.
 // program        → declaration* EOF ;
 //
