@@ -1,4 +1,9 @@
 
+/*
+  this will error if it doesn't recognize 
+  multi-line comments. class-y
+ */print "yay";
+
 fun sayHi(first, last) {
   print "Hi, " + first + " " + last + "!";
 }
