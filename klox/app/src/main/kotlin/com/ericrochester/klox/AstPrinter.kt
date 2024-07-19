@@ -47,6 +47,15 @@ class AstPrinter : ExprVisitor<String> {
     return rpn(superExpr.keyword.lexeme, superExpr.method.lexeme, '.')
   }
 
+  override fun visitTernaryExpr(ternaryExpr: Ternary): String {
+    return rpn(
+        ternaryExpr.condition,
+        ternaryExpr.thenBranch,
+        ternaryExpr.elseBranch,
+        "?:"
+    )
+  }
+
   override fun visitThisExpr(thisExpr: This): String {
     return thisExpr.keyword.lexeme
   }

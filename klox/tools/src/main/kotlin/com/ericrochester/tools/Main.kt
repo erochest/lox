@@ -24,6 +24,7 @@ fun main(args: Array<String>) {
           "Logical  : Expr left, Token operator, Expr right",
           "Set      : Expr obj, Token name, Expr value",
           "Super    : Token keyword, Token method",
+          "Ternary  : Expr condition, Expr thenBranch, Expr elseBranch",
           "This     : Token keyword",
           "Unary    : Token operator, Expr right",
           "Variable : Token name",

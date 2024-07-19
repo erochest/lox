@@ -6,7 +6,6 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-// TODO: ternary
 // TODO: error production for each binary operator appearing at the beginning of an expression
 
 // The parser so far.
@@ -44,7 +43,8 @@ private val logger = KotlinLogging.logger {}
 // whileStmt      → "while" "(" expression ")" statement ;
 // expression     → assignment ( "," assignment )* ;
 // assignment     → (call "." )? IDENTIFIER "=" assignment
-//                | logic_or ;
+//                | ternary ;
+// ternary        → logic_or ( "?" expression ":" expression )? ;
 // logic_or       → logic_and ( "or" logic_and )* ;
 // logic_and      → equality ( "or" equality )* ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
@@ -265,7 +265,7 @@ class Parser(private val tokens: List<Token>) {
   }
 
   private fun assignment(): Expr {
-    val expr = or()
+    val expr = ternary()
 
     if (match(EQUAL)) {
       val equals = previous()
@@ -281,6 +281,17 @@ class Parser(private val tokens: List<Token>) {
     }
 
     return expr
+  }
+
+  private fun ternary(): Expr {
+    val condition = or()
+    if (match(QUESTION)) {
+      val thenBranch = expression()
+      consume(COLON, "Expect ':' after ternary then branch.")
+      val elseBranch = expression()
+      return Ternary(condition, thenBranch, elseBranch)
+    }
+    return condition
   }
 
   private fun or(): Expr {

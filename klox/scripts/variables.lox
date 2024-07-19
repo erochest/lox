@@ -5,3 +5,5 @@ print a + b;
 
 print a = a + b, b = 2 * b, a + b;
 
+print a == 3 ? "odd" : "even";
+

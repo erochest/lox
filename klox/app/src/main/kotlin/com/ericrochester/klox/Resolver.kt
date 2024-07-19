@@ -225,6 +225,12 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     resolveLocal(superExpr, superExpr.keyword)
   }
 
+  override fun visitTernaryExpr(ternaryExpr: Ternary) {
+    resolve(ternaryExpr.condition)
+    resolve(ternaryExpr.thenBranch)
+    resolve(ternaryExpr.elseBranch)
+  }
+
   override fun visitThisExpr(thisExpr: This) {
     if (currentClassType == ClassType.NONE) {
       loxError(thisExpr.keyword, "Can't use 'this' outside of a class.")

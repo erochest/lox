@@ -17,6 +17,7 @@ interface ExprVisitor<R> {
     fun visitLogicalExpr(logicalExpr: Logical): R
     fun visitSetExpr(setExpr: Set): R
     fun visitSuperExpr(superExpr: Super): R
+    fun visitTernaryExpr(ternaryExpr: Ternary): R
     fun visitThisExpr(thisExpr: This): R
     fun visitUnaryExpr(unaryExpr: Unary): R
     fun visitVariableExpr(variableExpr: Variable): R
@@ -110,6 +111,16 @@ data class Super(
 ) : Expr() {
     override fun <R> accept(visitor: ExprVisitor<R>): R {
         return visitor.visitSuperExpr(this)
+    }
+}
+
+data class Ternary(
+    val condition: Expr,
+    val thenBranch: Expr,
+    val elseBranch: Expr,
+) : Expr() {
+    override fun <R> accept(visitor: ExprVisitor<R>): R {
+        return visitor.visitTernaryExpr(this)
     }
 }
 

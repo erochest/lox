@@ -168,6 +168,12 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     throw RuntimeError(getExpr.name, "Only instances have properties.")
   }
 
+  override fun visitTernaryExpr(ternaryExpr: Ternary): Any? {
+    val condition = evaluate(ternaryExpr.condition)
+    return if (isTruthy(condition)) evaluate(ternaryExpr.thenBranch)
+    else evaluate(ternaryExpr.elseBranch)
+  }
+
   override fun visitVariableExpr(variableExpr: Variable): Any? {
     return lookupVariable(variableExpr.name, variableExpr)
   }
