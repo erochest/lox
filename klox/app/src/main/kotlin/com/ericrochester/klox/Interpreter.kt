@@ -156,6 +156,10 @@ class Interpreter : ExprVisitor<Any?>, StmtVisitor<Unit> {
     return function.call(this, arguments)
   }
 
+  override fun visitCommaExpr(commaExpr: Comma): Any? {
+    return commaExpr.expressions.map { evaluate(it) }.lastOrNull()
+  }
+
   override fun visitGetExpr(getExpr: Get): Any? {
     val obj = evaluate(getExpr.obj)
     if (obj is LoxInstance) {

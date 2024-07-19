@@ -14,6 +14,7 @@ fun main(args: Array<String>) {
       outputDir,
       "Expr",
       listOf(
+          "Comma    : List<Expr> expressions",
           "Assign   : Token name, Expr value",
           "Binary   : Expr left, Token operator, Expr right",
           "Call     : Expr callee, Token paren, List<Expr> arguments",

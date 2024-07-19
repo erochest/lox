@@ -19,6 +19,10 @@ class AstPrinter : ExprVisitor<String> {
     return buffer.toString()
   }
 
+  override fun visitCommaExpr(commaExpr: Comma): String {
+    return commaExpr.expressions.joinToString(" ") { it.accept(this) }
+  }
+
   override fun visitGetExpr(getExpr: Get): String {
     return rpn(getExpr.obj, getExpr.name.lexeme, '.')
   }

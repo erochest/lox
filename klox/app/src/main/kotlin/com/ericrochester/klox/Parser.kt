@@ -6,7 +6,6 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-// TODO: comma operator (https://en.wikipedia.org/wiki/Comma_operator)
 // TODO: ternary
 // TODO: error production for each binary operator appearing at the beginning of an expression
 
@@ -43,10 +42,10 @@ private val logger = KotlinLogging.logger {}
 // printStmt      → "print" expression ";" ;
 // returnStmt     → "return" expression ";" ;
 // whileStmt      → "while" "(" expression ")" statement ;
-// expression     → assignment ;
+// expression     → assignment ( "," assignment )* ;
 // assignment     → (call "." )? IDENTIFIER "=" assignment
 //                | logic_or ;
-// logic_or       → lagic_and ( "or" logic_and )* ;
+// logic_or       → logic_and ( "or" logic_and )* ;
 // logic_and      → equality ( "or" equality )* ;
 // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 // comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
@@ -257,7 +256,12 @@ class Parser(private val tokens: List<Token>) {
     ) {
       throw error(previous(), "Unexpected binary operator at start of expression.")
     }
-    return assignment()
+
+    val exprList = mutableListOf(assignment())
+    while (match(COMMA)) {
+      exprList.add(assignment())
+    }
+    return if (exprList.size == 1) exprList[0] else Comma(exprList)
   }
 
   private fun assignment(): Expr {

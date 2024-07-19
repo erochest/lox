@@ -191,6 +191,10 @@ class Resolver(val interpreter: Interpreter) : ExprVisitor<Unit>, StmtVisitor<Un
     callExpr.arguments.forEach { resolve(it) }
   }
 
+  override fun visitCommaExpr(commaExpr: Comma) {
+    commaExpr.expressions.forEach { resolve(it) }
+  }
+
   override fun visitGetExpr(getExpr: Get) {
     resolve(getExpr.obj)
   }
