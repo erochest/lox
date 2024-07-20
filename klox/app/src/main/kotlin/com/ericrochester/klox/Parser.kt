@@ -6,6 +6,10 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
+// TODO: bug in parser:
+// `print "scone" + 4;
+// says 'Error at '+': Expect ';' after value.'
+
 // The parser so far.
 // program        → declaration* EOF ;
 //
