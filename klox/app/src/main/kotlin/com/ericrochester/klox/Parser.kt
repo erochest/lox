@@ -6,8 +6,6 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-// TODO: error production for each binary operator appearing at the beginning of an expression
-
 // The parser so far.
 // program        → declaration* EOF ;
 //
@@ -41,15 +39,18 @@ private val logger = KotlinLogging.logger {}
 // printStmt      → "print" expression ";" ;
 // returnStmt     → "return" expression ";" ;
 // whileStmt      → "while" "(" expression ")" statement ;
-// expression     → assignment ( "," assignment )* ;
+// expression     → assignment ( "," assignment )*
+//                | "," | "." | "=" ;
 // assignment     → (call "." )? IDENTIFIER "=" assignment
-//                | ternary ;
-// ternary        → logic_or ( "?" expression ":" expression )? ;
-// logic_or       → logic_and ( "or" logic_and )* ;
-// logic_and      → equality ( "or" equality )* ;
-// equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-// comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-// term           → factor ( ( "-" | "+" ) factor )* ;
+//                | ternary | "?" | ":" ;
+// ternary        → logic_or ( "?" expression ":" expression )?
+//                | "or" ;
+// logic_or       → logic_and ( "or" logic_and )* | "and" ;
+// logic_and      → equality ( "and" equality )* | "!=" | "==" ;
+// equality       → comparison ( ( "!=" | "==" ) comparison )*
+//                | ">" | ">=" | "<" | "<=" ;
+// comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* | "+" ;
+// term           → factor ( ( "-" | "+" ) factor )* | "/" | "*" ;
 // factor         → unary ( ( "/" | "*" ) unary )* ;
 // unary          → ( "!" | "-" ) unary
 //                | call ;
@@ -109,7 +110,7 @@ class Parser(private val tokens: List<Token>) {
     return ClassStmt(name, superclass, methods)
   }
 
-  private fun statement(): Stmt {
+  private fun statement(): Stmt? {
     if (match(PRINT)) return printStatement()
     if (match(RETURN)) return returnStatement()
     if (match(WHILE)) return whileStatement()
@@ -119,10 +120,10 @@ class Parser(private val tokens: List<Token>) {
     return expressionStatement()
   }
 
-  private fun printStatement(): Stmt {
+  private fun printStatement(): Stmt? {
     val value = expression()
     consume(SEMICOLON, "Expect ';' after value.")
-    return Print(value)
+    return value?.let { Print(it) }
   }
 
   private fun returnStatement(): Stmt {
@@ -137,19 +138,19 @@ class Parser(private val tokens: List<Token>) {
     return ReturnStmt(keyword, value)
   }
 
-  private fun whileStatement(): Stmt {
+  private fun whileStatement(): Stmt? {
     consume(LEFT_PAREN, "Expect '(' after 'while'.")
     val condition = expression()
     consume(RIGHT_PAREN, "Expect ')' after condition.")
     val body = statement()
 
-    return While(condition, body)
+    return if (condition != null && body != null) While(condition, body) else null
   }
 
-  private fun expressionStatement(): Stmt {
+  private fun expressionStatement(): Stmt? {
     val value = expression()
     consume(SEMICOLON, "Expect ';' after expression.")
-    return Expression(value)
+    return value?.let { Expression(it) }
   }
 
   private fun function(kind: String): Function {
@@ -185,7 +186,7 @@ class Parser(private val tokens: List<Token>) {
     return statements
   }
 
-  private fun ifStatement(): Stmt {
+  private fun ifStatement(): Stmt? {
     consume(LEFT_PAREN, "Expect '(' after 'if'.")
     val condition = expression()
     consume(RIGHT_PAREN, "Expect ')' after if condition.")
@@ -195,10 +196,12 @@ class Parser(private val tokens: List<Token>) {
     if (match(ELSE)) {
       elseBranch = statement()
     }
-    return If(condition, thenBranch, elseBranch)
+    return if (condition != null && thenBranch != null && elseBranch != null)
+      If(condition, thenBranch, elseBranch)
+    else null
   }
 
-  private fun forStatement(): Stmt {
+  private fun forStatement(): Stmt? {
     consume(LEFT_PAREN, "Expect '(' after 'for'.")
 
     val initializer: Stmt? =
@@ -219,7 +222,7 @@ class Parser(private val tokens: List<Token>) {
     var body = statement()
 
     increment?.let { body = Block(listOf(body, Expression(it))) }
-    body = While(condition ?: Literal(true), body)
+    body = body?.let { While(condition ?: Literal(true), it) }
     initializer?.let { body = Block(listOf(it, body)) }
 
     return body
@@ -237,34 +240,29 @@ class Parser(private val tokens: List<Token>) {
     return Var(name, initializer)
   }
 
-  private fun expression(): Expr {
+  private fun expression(): Expr? {
     logger.debug { "Parsing expression: " + peek().toString() }
 
-    if (match(
-            COMMA,
-            QUESTION,
-            BANG_EQUAL,
-            EQUAL_EQUAL,
-            GREATER,
-            GREATER_EQUAL,
-            LESS,
-            LESS_EQUAL,
-            PLUS,
-            SLASH,
-            STAR
-        )
-    ) {
-      throw error(previous(), "Unexpected binary operator at start of expression.")
+    if (match(DOT, EQUAL, COMMA)) {
+      missingLeftError(previous()) { assignment() }
+      return null
     }
 
     val exprList = mutableListOf(assignment())
     while (match(COMMA)) {
       exprList.add(assignment())
     }
-    return if (exprList.size == 1) exprList[0] else Comma(exprList)
+
+    val filtered = exprList.filterNotNull()
+    return if (filtered.size == 1) filtered[0] else Comma(filtered)
   }
 
-  private fun assignment(): Expr {
+  private fun assignment(): Expr? {
+    if (match(QUESTION, COLON)) {
+      missingLeftError(previous()) { expression() }
+      return null
+    }
+
     val expr = ternary()
 
     if (match(EQUAL)) {
@@ -273,9 +271,9 @@ class Parser(private val tokens: List<Token>) {
 
       if (expr is Variable) {
         val name = expr.name
-        return Assign(name, value)
+        return value?.let { Assign(name, it) }
       } else if (expr is Get) {
-        return Set(expr.obj, expr.name, value)
+        return value?.let { Set(expr.obj, expr.name, it) }
       }
       throw error(equals, "Invalid assignment target.")
     }
@@ -283,80 +281,115 @@ class Parser(private val tokens: List<Token>) {
     return expr
   }
 
-  private fun ternary(): Expr {
+  private fun ternary(): Expr? {
+    if (match(OR)) {
+      missingLeftError(previous()) { and() }
+      return null
+    }
+
     val condition = or()
+
     if (match(QUESTION)) {
       val thenBranch = expression()
       consume(COLON, "Expect ':' after ternary then branch.")
       val elseBranch = expression()
-      return Ternary(condition, thenBranch, elseBranch)
+      return if (condition != null && thenBranch != null && elseBranch != null)
+        Ternary(condition, thenBranch, elseBranch)
+      else null
     }
+
     return condition
   }
 
-  private fun or(): Expr {
+  private fun or(): Expr? {
+    if (match(AND)) {
+      missingLeftError(previous()) { equality() }
+      return null
+    }
+
     var expr = and()
 
     while (match(OR)) {
       val operator = previous()
       val right = and()
-      expr = Logical(expr, operator, right)
+      expr = if (expr != null && right != null) Logical(expr, operator, right) else null
     }
 
     return expr
   }
 
-  private fun and(): Expr {
+  private fun and(): Expr? {
+    if (match(BANG_EQUAL, EQUAL_EQUAL)) {
+      missingLeftError(previous()) { comparison() }
+      return null
+    }
+
     var expr = equality()
 
     while (match(AND)) {
       val operator = previous()
       val right = equality()
-      expr = Logical(expr, operator, right)
+      expr = if (expr != null && right != null) Logical(expr, operator, right) else null
     }
 
     return expr
   }
 
-  private fun equality(): Expr {
+  private fun equality(): Expr? {
     logger.debug { "Parsing equality: " + peek().toString() }
-    return leftAssociativeBinary(arrayOf(BANG_EQUAL, EQUAL_EQUAL)) { comparison() }
+    if (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
+      missingLeftError(previous()) { comparison() }
+      return null
+    }
+    leftAssociativeBinary(arrayOf(BANG_EQUAL, EQUAL_EQUAL)) { comparison() }
+    return null
   }
 
-  private fun comparison(): Expr {
+  private fun comparison(): Expr? {
+    if (match(PLUS)) {
+      missingLeftError(previous()) { term() }
+      return null
+    }
     logger.debug { "Parsing comparison: " + peek().toString() }
-    return leftAssociativeBinary(arrayOf(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) { term() }
+    leftAssociativeBinary(arrayOf(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) { term() }
+    return null
   }
 
-  private fun term(): Expr {
+  private fun term(): Expr? {
+    if (match(SLASH, STAR)) {
+      missingLeftError(previous()) { factor() }
+      return null
+    }
     logger.debug { "Parsing term: " + peek().toString() }
-    return leftAssociativeBinary(arrayOf(MINUS, PLUS)) { factor() }
+    leftAssociativeBinary(arrayOf(MINUS, PLUS)) { factor() }
+    return null
   }
 
-  private fun factor(): Expr {
+  private fun factor(): Expr? {
     logger.debug { "Parsing factor: " + peek().toString() }
-    return leftAssociativeBinary(arrayOf(SLASH, STAR)) { unary() }
+    leftAssociativeBinary(arrayOf(SLASH, STAR)) { unary() }
+    return null
   }
 
-  private fun unary(): Expr {
+  private fun unary(): Expr? {
     logger.debug { "Parsing unary: " + peek().toString() }
     if (match(BANG, MINUS)) {
       val op = previous()
       val right = unary()
-      return Unary(op, right)
+      return right?.let { Unary(op, it) }
     }
     return call()
   }
 
-  private fun call(): Expr {
+  private fun call(): Expr? {
     var expr = primary()
 
     while (true) {
       if (match(LEFT_PAREN)) {
-        expr = finishCall(expr)
+        expr = expr?.let { finishCall(it) }
       } else if (match(DOT)) {
         val name = consume(IDENTIFIER, "Expect property name after '.'.")
-        expr = Get(expr, name)
+        expr = expr?.let { Get(it, name) }
       } else {
         break
       }
@@ -373,7 +406,7 @@ class Parser(private val tokens: List<Token>) {
         if (arguments.size >= 255) {
           error(peek(), "Cannot have more than 255 arguments.")
         }
-        arguments.add(assignment())
+        assignment()?.let { arguments.add(it) }
       } while (match(COMMA))
       // TODO: this doesn't handle trailing commas
     }
@@ -383,7 +416,7 @@ class Parser(private val tokens: List<Token>) {
     return Call(callee, paren, arguments)
   }
 
-  private fun primary(): Expr {
+  private fun primary(): Expr? {
     logger.debug { "Parsing primary: " + peek().toString() }
     if (match(FALSE)) return Literal(false)
     if (match(TRUE)) return Literal(true)
@@ -409,7 +442,7 @@ class Parser(private val tokens: List<Token>) {
     if (match(LEFT_PAREN)) {
       val expr = expression()
       consume(RIGHT_PAREN, "Expect ')' after expression.")
-      return Grouping(expr)
+      return expr?.let { Grouping(it) }
     }
 
     throw error(peek(), "Expect expression")
@@ -417,13 +450,17 @@ class Parser(private val tokens: List<Token>) {
 
   // Helpers
 
-  private fun leftAssociativeBinary(types: Array<TokenType>, childParser: () -> Expr): Expr {
+  private fun leftAssociativeBinary(types: Array<TokenType>, childParser: () -> Expr?): Expr? {
     var expr = childParser()
+
+    if (expr == null) {
+      return null
+    }
 
     while (match(*types)) {
       val op = previous()
       val right = childParser()
-      expr = Binary(expr, op, right)
+      expr = if (expr != null && right != null) Binary(expr, op, right) else null
     }
 
     return expr
@@ -483,5 +520,10 @@ class Parser(private val tokens: List<Token>) {
         else -> advance()
       }
     }
+  }
+
+  private fun missingLeftError(operator: Token, next: () -> Expr?) {
+    loxError(operator, "Expect expression on the left side of ${operator.lexeme}.")
+    next()
   }
 }
