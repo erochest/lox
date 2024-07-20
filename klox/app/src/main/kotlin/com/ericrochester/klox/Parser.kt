@@ -54,7 +54,7 @@ private val logger = KotlinLogging.logger {}
 // unary          → ( "!" | "-" ) unary
 //                | call ;
 // call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
-// arguments      → expression ( "," expression )* ;
+// arguments      → assignment ( "," assignment )* ;
 // primary        → NUMBER | STRING | "true" | "false" | "nil"
 //                | "(" expression ")" | IDENTIFIER
 //                | "super" "." IDENTIFIER ;
@@ -373,7 +373,7 @@ class Parser(private val tokens: List<Token>) {
         if (arguments.size >= 255) {
           error(peek(), "Cannot have more than 255 arguments.")
         }
-        arguments.add(expression())
+        arguments.add(assignment())
       } while (match(COMMA))
       // TODO: this doesn't handle trailing commas
     }
