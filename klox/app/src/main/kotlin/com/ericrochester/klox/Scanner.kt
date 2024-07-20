@@ -69,15 +69,12 @@ class Scanner(private val source: String) {
                 // A comment goes until the end of the line.
                 while (peek() != '\n' && !isAtEnd()) advance()
             } else if (match('*')) {
-                println("found block comment")
                 while (peek() != '*' && peekNext() != '/' && !isAtEnd()) {
-                    println("peek: ${peek()} peekNext: ${peekNext()}")
                     if (peek() == '\n') line++
                     advance()
                 }
                 advance()
                 advance()
-                println("found end of block comment")
             } else {
                 addToken(SLASH)
             }
