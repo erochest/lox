@@ -1,3 +1,2 @@
-mod error;
-
-
+pub mod chunk;
+pub mod error;

@@ -1,6 +1,5 @@
 use clap::Parser;
 use clap_verbosity_flag::Verbosity;
-use env_logger;
 use human_panic::setup_panic;
 
 use loxrs::error::Result;
