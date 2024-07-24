@@ -1,6 +1,9 @@
 use std::convert::TryFrom;
 
+use log;
+
 use crate::chunk::{Chunk, OpCode};
+use crate::debug::dissassemble_instruction;
 use crate::error::{Error, Result};
 
 use Error::*;
@@ -25,6 +28,10 @@ impl<'a> VM<'a> {
     pub fn run(&mut self) -> Result<()> {
         if let Some(chunk) = self.chunk {
             loop {
+                if log::max_level() >= log::Level::Trace {
+                    dissassemble_instruction(chunk, self.ip);
+                }
+
                 let instruction = self.read_op_code(chunk);
                 match OpCode::try_from(instruction)? {
                     OpConstant => {

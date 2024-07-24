@@ -3,7 +3,6 @@ use clap_verbosity_flag::Verbosity;
 use human_panic::setup_panic;
 
 use loxrs::chunk::{Chunk, OpCode};
-use loxrs::debug::dissassemble_chunk;
 use loxrs::error::Result;
 use loxrs::vm::VM;
 
@@ -20,8 +19,6 @@ fn main() -> Result<()> {
     chunk.write(constant as u8, 123);
 
     chunk.write(OpCode::OpReturn as u8, 123);
-
-    dissassemble_chunk(&chunk, "test chunk");
 
     let mut vm = VM::new();
     vm.interpret(&chunk)?;
