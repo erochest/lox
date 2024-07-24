@@ -30,7 +30,7 @@ impl<'a> VM<'a> {
                     OpConstant => {
                         let constant = self.read_constant(chunk);
                         self.print_value(constant);
-                        println!("");
+                        println!();
                     }
                     OpReturn => {
                         return Ok(());
@@ -56,5 +56,11 @@ impl<'a> VM<'a> {
     fn read_constant(&mut self, chunk: &'a Chunk) -> f64 {
         let constant = self.read_op_code(chunk);
         chunk.constants[constant as usize]
+    }
+}
+
+impl<'a> Default for VM<'a> {
+    fn default() -> Self {
+        Self::new()
     }
 }
