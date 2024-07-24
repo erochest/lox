@@ -56,11 +56,14 @@ impl<'a> VM<'a> {
                         let constant = self.read_constant(chunk);
                         self.push(constant);
                     }
+                    OpNegate => {
+                        let value = self.pop();
+                        self.push(-value);
+                    }
                     OpReturn => {
                         let value = self.pop();
                         self.print_value(value);
                         println!();
-                        break;
                     }
                 }
             }

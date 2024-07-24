@@ -17,6 +17,7 @@ fn main() -> Result<()> {
     let constant = chunk.add_constant(1.2);
     chunk.write(OpCode::OpConstant as u8, 123);
     chunk.write(constant as u8, 123);
+    chunk.write(OpCode::OpNegate as u8, 123);
 
     chunk.write(OpCode::OpReturn as u8, 123);
 

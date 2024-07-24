@@ -5,6 +5,7 @@ use crate::value::Value;
 
 pub enum OpCode {
     OpConstant,
+    OpNegate,
     OpReturn,
 }
 
@@ -14,7 +15,8 @@ impl TryFrom<u8> for OpCode {
     fn try_from(value: u8) -> Result<Self, Error> {
         match value {
             0 => Ok(OpCode::OpConstant),
-            1 => Ok(OpCode::OpReturn),
+            1 => Ok(OpCode::OpNegate),
+            2 => Ok(OpCode::OpReturn),
             _ => Err(Error::InvalidOpCode(value)),
         }
     }

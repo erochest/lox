@@ -1,4 +1,6 @@
-use crate::chunk::Chunk;
+use std::convert::TryInto;
+
+use crate::chunk::{Chunk, OpCode};
 use crate::value::print_value;
 
 pub fn dissassemble_chunk(chunk: &Chunk, name: &str) {
@@ -13,6 +15,11 @@ pub fn dissassemble_chunk(chunk: &Chunk, name: &str) {
 pub fn dissassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
     print!("{:04} ", offset);
 
+    if offset >= chunk.code.len() {
+        println!("End of chunk");
+        return offset;
+    }
+
     if offset > 0 && chunk.lines[offset] == chunk.lines[offset - 1] {
         print!("   | ");
     } else {
@@ -20,13 +27,11 @@ pub fn dissassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
     }
 
     let instruction = chunk.get(offset);
+    let instruction: OpCode = instruction.try_into().unwrap();
     match instruction {
-        0 => constant_instruction("OP_CONSTANT", chunk, offset),
-        1 => simple_instruction("OP_RETURN", offset),
-        _ => {
-            println!("Unknown opcode {}", instruction);
-            offset + 1
-        }
+        OpCode::OpConstant => constant_instruction("OP_CONSTANT", chunk, offset),
+        OpCode::OpNegate => simple_instruction("OP_NEGATE", offset),
+        OpCode::OpReturn => simple_instruction("OP_RETURN", offset),
     }
 }
 
