@@ -38,7 +38,7 @@ fn simple_instruction(name: &str, offset: usize) -> usize {
 fn constant_instruction(name: &str, chunk: &Chunk, offset: usize) -> usize {
     let constant = chunk.get(offset + 1);
     print!("{:-16} {:04} '", name, constant);
-    print_value(chunk.constants.get(constant as usize));
+    print_value(chunk.constants[constant as usize]);
     println!("'");
     offset + 2
 }

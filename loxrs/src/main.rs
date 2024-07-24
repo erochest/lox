@@ -5,6 +5,7 @@ use human_panic::setup_panic;
 use loxrs::chunk::{Chunk, OpCode};
 use loxrs::debug::dissassemble_chunk;
 use loxrs::error::Result;
+use loxrs::vm::VM;
 
 fn main() -> Result<()> {
     setup_panic!();
@@ -14,7 +15,6 @@ fn main() -> Result<()> {
         .init();
 
     let mut chunk = Chunk::new();
-
     let constant = chunk.add_constant(1.2);
     chunk.write(OpCode::OpConstant as u8, 123);
     chunk.write(constant as u8, 123);
@@ -22,6 +22,9 @@ fn main() -> Result<()> {
     chunk.write(OpCode::OpReturn as u8, 123);
 
     dissassemble_chunk(&chunk, "test chunk");
+
+    let mut vm = VM::new();
+    vm.interpret(&chunk)?;
 
     Ok(())
 }
