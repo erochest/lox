@@ -30,6 +30,10 @@ pub fn dissassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
     let instruction: OpCode = instruction.try_into().unwrap();
     match instruction {
         OpCode::OpConstant => constant_instruction("OP_CONSTANT", chunk, offset),
+        OpCode::OpAdd => simple_instruction("OP_ADD", offset),
+        OpCode::OpSubtract => simple_instruction("OP_SUBTRACT", offset),
+        OpCode::OpMultiply => simple_instruction("OP_MULTIPLY", offset),
+        OpCode::OpDivide => simple_instruction("OP_DIVIDE", offset),
         OpCode::OpNegate => simple_instruction("OP_NEGATE", offset),
         OpCode::OpReturn => simple_instruction("OP_RETURN", offset),
     }

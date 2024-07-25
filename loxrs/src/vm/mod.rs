@@ -10,6 +10,16 @@ use crate::value::Value;
 use Error::*;
 use OpCode::*;
 
+macro_rules! binary_op {
+    ($vm:ident, $op:tt) => {
+        {
+            let b = $vm.pop();
+            let a = $vm.pop();
+            $vm.push(a $op b);
+        }
+    };
+}
+
 const STACK_MAX: usize = 256;
 
 pub struct VM<'a> {
@@ -56,6 +66,10 @@ impl<'a> VM<'a> {
                         let constant = self.read_constant(chunk);
                         self.push(constant);
                     }
+                    OpAdd => binary_op!(self, +),
+                    OpSubtract => binary_op!(self, -),
+                    OpMultiply => binary_op!(self, *),
+                    OpDivide => binary_op!(self, /),
                     OpNegate => {
                         let value = self.pop();
                         self.push(-value);
