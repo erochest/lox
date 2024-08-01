@@ -3,6 +3,7 @@ use std::convert::TryFrom;
 use log;
 
 use crate::chunk::{Chunk, OpCode};
+use crate::compiler;
 use crate::debug::dissassemble_instruction;
 use crate::error::{Error, Result};
 use crate::value::Value;
@@ -43,10 +44,9 @@ impl<'a> VM<'a> {
         self.stack_top = 0;
     }
 
-    pub fn interpret(&'a mut self, chunk: &'a Chunk) -> Result<()> {
-        self.chunk = Some(chunk);
-        self.ip = 0;
-        self.run()
+    pub fn interpret<S: AsRef<str>>(&mut self, source: S) -> Result<()> {
+        compiler::compile(source.as_ref());
+        Ok(())
     }
 
     pub fn run(&mut self) -> Result<()> {
