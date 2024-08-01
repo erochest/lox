@@ -45,7 +45,7 @@ impl<'a> VM<'a> {
     }
 
     pub fn interpret<S: AsRef<str>>(&mut self, source: S) -> Result<()> {
-        compiler::compile(source.as_ref());
+        compiler::compile(source.as_ref())?;
         Ok(())
     }
 

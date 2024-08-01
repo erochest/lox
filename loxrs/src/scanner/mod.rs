@@ -59,16 +59,13 @@ pub enum TokenType {
     EOF,
 }
 
-// TODO: I can add a lifetime to this to make this reference a slice instead of containing the
-// indexes.
-pub struct Token {
+pub struct Token<'a> {
     pub ty: TokenType,
-    pub start: usize,
-    pub length: usize,
+    pub token: &'a str,
     pub line: usize,
 }
 
-impl Scanner {
+impl<'a> Scanner {
     pub fn new(input: String) -> Self {
         Self {
             input,
@@ -87,7 +84,7 @@ impl Scanner {
         }
     }
 
-    pub fn scan_token(&mut self) -> Result<Token> {
+    pub fn scan_token(&'a mut self) -> Result<Token<'a>> {
         todo!()
     }
 }

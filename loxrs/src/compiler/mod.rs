@@ -15,12 +15,7 @@ pub fn compile<S: AsRef<str>>(source: S) -> Result<()> {
             print!("   | ");
         }
 
-        println!(
-            "{:#?}. '{:width$}'",
-            token.ty,
-            token.start,
-            width = token.length
-        );
+        println!("{:#?}. {:#?}", token.ty, token.token);
 
         if token.ty == crate::scanner::TokenType::EOF {
             break;
