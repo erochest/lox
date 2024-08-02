@@ -1,3 +1,5 @@
+use std::char;
+
 use crate::error::Result;
 
 pub struct Scanner {
@@ -104,6 +106,9 @@ impl<'a> Scanner {
         }
 
         let c = self.advance();
+        if c.is_ascii_digit() {
+            return self.number();
+        }
 
         match c {
             '(' => return Ok(self.make_token(TokenType::LeftParen)),
@@ -122,6 +127,8 @@ impl<'a> Scanner {
             '=' => return self.match_second("=", TokenType::EqualEqual, TokenType::Equal),
             '<' => return self.match_second("=", TokenType::LessEqual, TokenType::Less),
             '>' => return self.match_second("=", TokenType::GreaterEqual, TokenType::Greater),
+
+            '"' => return self.string(),
 
             _ => {}
         }
@@ -197,6 +204,22 @@ impl<'a> Scanner {
         true
     }
 
+    fn string(&'a mut self) -> Result<Token<'a>> {
+        while self.peek() != '"' && !self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+            self.advance();
+        }
+
+        if self.is_at_end() {
+            return Ok(self.error_token("Unterminated string.".to_string()));
+        }
+
+        self.advance();
+        Ok(self.make_token(TokenType::String))
+    }
+
     fn is_at_end(&self) -> bool {
         self.current >= self.input.len()
     }
@@ -207,5 +230,20 @@ impl<'a> Scanner {
 
     fn error_token(&self, message: String) -> Token {
         Token::error(message, self.line)
+    }
+
+    fn number(&'a mut self) -> Result<Token<'a>> {
+        while self.peek().is_ascii_digit() {
+            self.advance();
+        }
+
+        if self.peek() == '.' && self.peek_next().is_ascii_digit() {
+            self.advance();
+            while self.peek().is_ascii_digit() {
+                self.advance();
+            }
+        }
+
+        Ok(self.make_token(TokenType::Number))
     }
 }
