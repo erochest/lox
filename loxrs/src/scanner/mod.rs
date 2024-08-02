@@ -101,8 +101,63 @@ impl<'a> Scanner {
             return Ok(self.make_token(TokenType::EOF));
         }
 
+        let c = self.advance();
+
+        match c {
+            '(' => return Ok(self.make_token(TokenType::LeftParen)),
+            ')' => return Ok(self.make_token(TokenType::RightParen)),
+            '{' => return Ok(self.make_token(TokenType::LeftBrace)),
+            '}' => return Ok(self.make_token(TokenType::RightBrace)),
+            ';' => return Ok(self.make_token(TokenType::Semicolon)),
+            ',' => return Ok(self.make_token(TokenType::Comma)),
+            '.' => return Ok(self.make_token(TokenType::Dot)),
+            '-' => return Ok(self.make_token(TokenType::Minus)),
+            '+' => return Ok(self.make_token(TokenType::Plus)),
+            '/' => return Ok(self.make_token(TokenType::Slash)),
+            '*' => return Ok(self.make_token(TokenType::Star)),
+
+            '!' => return self.match_second("=", TokenType::BangEqual, TokenType::Bang),
+            '=' => return self.match_second("=", TokenType::EqualEqual, TokenType::Equal),
+            '<' => return self.match_second("=", TokenType::LessEqual, TokenType::Less),
+            '>' => return self.match_second("=", TokenType::GreaterEqual, TokenType::Greater),
+
+            _ => {}
+        }
+
         // TODO: Make this an Err(Error).
         Ok(self.error_token("Unexpected character.".to_string()))
+    }
+
+    fn advance(&mut self) -> char {
+        self.current += 1;
+        self.input[self.current - 1..self.current]
+            .chars()
+            .next()
+            .unwrap()
+    }
+
+    fn match_second(
+        &mut self,
+        expected: &str,
+        matches: TokenType,
+        does_not_match: TokenType,
+    ) -> Result<Token> {
+        if self.match_char(expected) {
+            Ok(self.make_token(matches))
+        } else {
+            Ok(self.make_token(does_not_match))
+        }
+    }
+
+    fn match_char(&mut self, expected: &str) -> bool {
+        if self.is_at_end() {
+            return false;
+        }
+        if self.input[self.current..self.current + 1] != *expected {
+            return false;
+        }
+        self.current += 1;
+        true
     }
 
     fn is_at_end(&self) -> bool {
