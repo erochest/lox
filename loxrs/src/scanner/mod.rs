@@ -95,6 +95,8 @@ impl<'a> Scanner {
     }
 
     pub fn scan_token(&'a mut self) -> Result<Token<'a>> {
+        self.skip_whitespace();
+
         self.start = self.current;
 
         if self.is_at_end() {
@@ -126,6 +128,41 @@ impl<'a> Scanner {
 
         // TODO: Make this an Err(Error).
         Ok(self.error_token("Unexpected character.".to_string()))
+    }
+
+    fn skip_whitespace(&mut self) {
+        loop {
+            let c = self.peek();
+            match c {
+                ' ' | '\r' | '\t' => {}
+                '\n' => self.line += 1,
+                '/' => {
+                    if self.peek_next() == '/' {
+                        while self.peek() != '\n' && !self.is_at_end() {
+                            self.advance();
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                _ => break,
+            }
+            self.current += 1;
+        }
+    }
+
+    fn peek(&self) -> char {
+        self.input[self.current..self.current + 1]
+            .chars()
+            .next()
+            .unwrap_or('\0')
+    }
+
+    fn peek_next(&self) -> char {
+        self.input[self.current + 1..self.current + 2]
+            .chars()
+            .next()
+            .unwrap_or('\0')
     }
 
     fn advance(&mut self) -> char {
