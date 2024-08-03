@@ -106,6 +106,9 @@ impl<'a> Scanner {
         }
 
         let c = self.advance();
+        if c.is_ascii_alphabetic() || c == '_' {
+            return self.identifier();
+        }
         if c.is_ascii_digit() {
             return self.number();
         }
@@ -245,5 +248,60 @@ impl<'a> Scanner {
         }
 
         Ok(self.make_token(TokenType::Number))
+    }
+
+    fn identifier(&'a mut self) -> Result<Token<'a>> {
+        while self.peek().is_ascii_alphanumeric() || self.peek() == '_' {
+            self.advance();
+        }
+        Ok(self.make_token(self.identifier_type()))
+    }
+
+    fn identifier_type(&self) -> TokenType {
+        let input = &self.input[self.start..self.current];
+        let first_char = input.chars().next().unwrap();
+
+        match first_char {
+            'a' => self.check_keyword(input, "and", TokenType::And),
+            'c' => self.check_keyword(input, "class", TokenType::Class),
+            'e' => self.check_keyword(input, "else", TokenType::Else),
+            'i' => self.check_keyword(input, "if", TokenType::If),
+            'n' => self.check_keyword(input, "nil", TokenType::Nil),
+            'o' => self.check_keyword(input, "or", TokenType::Or),
+            'p' => self.check_keyword(input, "print", TokenType::Print),
+            'r' => self.check_keyword(input, "return", TokenType::Return),
+            's' => self.check_keyword(input, "super", TokenType::Super),
+            'v' => self.check_keyword(input, "var", TokenType::Var),
+            'w' => self.check_keyword(input, "while", TokenType::While),
+
+            'f' => {
+                let second_char = input.chars().nth(1).unwrap();
+                match second_char {
+                    'a' => self.check_keyword(input, "false", TokenType::False),
+                    'o' => self.check_keyword(input, "for", TokenType::For),
+                    'u' => self.check_keyword(input, "fun", TokenType::Fun),
+                    _ => TokenType::Identifier,
+                }
+            }
+
+            't' => {
+                let second_char = input.chars().nth(1).unwrap();
+                match second_char {
+                    'h' => self.check_keyword(input, "this", TokenType::This),
+                    'r' => self.check_keyword(input, "true", TokenType::True),
+                    _ => TokenType::Identifier,
+                }
+            }
+
+            _ => TokenType::Identifier,
+        }
+    }
+
+    fn check_keyword(&self, input: &str, rest: &str, ty: TokenType) -> TokenType {
+        if input == rest {
+            ty
+        } else {
+            TokenType::Identifier
+        }
     }
 }
