@@ -1,26 +1,63 @@
+use std::borrow::BorrowMut;
+use std::cell::RefCell;
+
+use crate::chunk::Chunk;
 use crate::error::Result;
-use crate::scanner::Scanner;
+use crate::scanner::{Scanner, Token, TokenType};
 
-pub fn compile<S: AsRef<str>>(source: S) -> Result<()> {
-    let mut scanner = Scanner::new(source.as_ref().to_string());
+struct Compiler<'a> {
+    scanner: Scanner,
+    chunk: Box<&'a Chunk>,
+    current: Option<Token<'a>>,
+    previous: Option<Token<'a>>,
+}
 
-    let mut line: usize = 0;
-    loop {
-        let token = scanner.scan_token()?;
+pub fn compile<S: AsRef<str>>(source: S, chunk: &mut Chunk) -> Result<()> {
+    let source = source.as_ref().to_string();
+    let scanner = Scanner::new(source);
+    let mut compiler = Compiler::new(scanner, chunk);
 
-        if token.line != line {
-            line = token.line;
-            println!("{:4} ", line);
-        } else {
-            print!("   | ");
-        }
+    compiler.advance()?;
+    compiler.expression()?;
+    compiler.consume_eof()?;
 
-        println!("{:#?}. {:#?}", token.ty, token.token);
+    Ok(())
+}
 
-        if token.ty == crate::scanner::TokenType::EOF {
-            break;
+impl<'a> Compiler<'a> {
+    fn new(scanner: Scanner, chunk: &'a Chunk) -> Self {
+        let chunk = Box::new(chunk);
+        Self {
+            scanner,
+            chunk,
+            current: None,
+            previous: None,
         }
     }
 
-    Ok(())
+    fn advance(&mut self) -> Result<()> {
+        self.previous = self.current.take();
+
+        loop {
+            let current = self.scanner.scan_token();
+            if let Ok(token) = current {
+                self.current = Some(token);
+                return Ok(());
+            }
+            error_at_current(self.scanner.current, self.current.as_ref().unwrap().token);
+        }
+    }
+
+    fn expression(&mut self) -> Result<()> {
+        self.scanner.expression()
+    }
+
+    fn consume_eof(&self) -> Result<()> {
+        self.scanner
+            .consume(TokenType::EOF, "Expect end of expression.")
+    }
+}
+
+fn error_at_current(pos: usize, token: &str) -> Result<()> {
+    todo!()
 }

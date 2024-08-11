@@ -34,18 +34,18 @@ pub fn run_file(file: PathBuf) -> Result<()> {
     Ok(())
 }
 
-struct Repl<'a> {
-    vm: RefCell<VM<'a>>,
+struct Repl {
+    vm: RefCell<VM>,
 }
 
-impl<'a> Repl<'a> {
+impl Repl {
     fn new() -> Self {
         Self {
             vm: RefCell::new(VM::new()),
         }
     }
 
-    fn interpret(&'a self, source: &str) -> Result<()> {
+    fn interpret(&self, source: &str) -> Result<()> {
         let mut vm = self.vm.borrow_mut();
         vm.interpret(source)
     }
