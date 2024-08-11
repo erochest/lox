@@ -1,15 +1,15 @@
-use std::{char, iter};
+use std::char;
 
 use crate::error::{Error, Result};
 
 pub struct Scanner {
-    input: String,
-    start: usize,
+    pub input: String,
+    pub start: usize,
     pub current: usize,
-    line: usize,
+    pub line: usize,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum TokenType {
     // Single-character tokens.
     LeftParen,
@@ -57,6 +57,7 @@ pub enum TokenType {
     Var,
     While,
 
+    Error,
     EOF,
 }
 
@@ -77,12 +78,12 @@ impl Token {
         }
     }
 
-    pub fn token<'a>(&self, input: &'a str) -> &'a str {
+    pub fn text<'a>(&self, _input: &'a str) -> &'a str {
         todo!()
     }
 }
 
-impl<'a> Scanner {
+impl Scanner {
     pub fn new(input: String) -> Self {
         Self {
             input,
@@ -308,21 +309,16 @@ impl<'a> Scanner {
         }
     }
 
-    pub fn scan_to_next(&mut self) -> Option<Token> {
-        iter::repeat_with(move || self.scan_token())
-            .filter_map(|token| match token {
-                Err(ref err) => {
-                    if let Error::ScanError(c, line_no) = err {
-                        error_at_current(*line_no, &c.to_string());
-                    }
-                    None
-                }
-                Ok(token) => Some(token),
-            })
-            .next()
-    }
-}
+    pub fn scan_to_next(&mut self) -> (Option<Token>, Vec<(char, usize)>) {
+        let mut errors = Vec::new();
 
-fn error_at_current(pos: usize, token: &str) {
-    todo!()
+        loop {
+            let token = self.scan_token();
+            match token {
+                Ok(token) => return (Some(token), errors),
+                Err(Error::ScanError(c, line_no)) => errors.push((c, line_no)),
+                Err(_) => {}
+            }
+        }
+    }
 }

@@ -10,10 +10,10 @@ pub type Result<R> = result::Result<R, Error>;
 pub enum Error {
     MissingChunkError,
     InvalidOpCode(u8),
-    CompileError,
-    RuntimeError,
     IoError(io::Error),
     ScanError(char, usize),
+    CompileError,
+    RuntimeError,
 }
 
 use Error::*;
@@ -23,10 +23,10 @@ impl fmt::Display for Error {
         match self {
             MissingChunkError => write!(f, "Missing chunk error"),
             InvalidOpCode(value) => write!(f, "Invalid opcode: {}", value),
-            CompileError => write!(f, "Compile error"),
-            RuntimeError => write!(f, "Runtime error"),
             IoError(ref err) => err.fmt(f),
             ScanError(c, line_no) => write!(f, "Scan error '{}' line {}", c, line_no),
+            CompileError => write!(f, "Compile error"),
+            RuntimeError => write!(f, "Runtime error"),
         }
     }
 }
