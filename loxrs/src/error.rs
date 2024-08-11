@@ -13,6 +13,7 @@ pub enum Error {
     CompileError,
     RuntimeError,
     IoError(io::Error),
+    ScanError(char, usize),
 }
 
 use Error::*;
@@ -25,6 +26,7 @@ impl fmt::Display for Error {
             CompileError => write!(f, "Compile error"),
             RuntimeError => write!(f, "Runtime error"),
             IoError(ref err) => err.fmt(f),
+            ScanError(c, line_no) => write!(f, "Scan error '{}' line {}", c, line_no),
         }
     }
 }

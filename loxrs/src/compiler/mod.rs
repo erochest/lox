@@ -1,60 +1,49 @@
 use std::borrow::BorrowMut;
 use std::cell::RefCell;
+use std::iter;
 
 use crate::chunk::Chunk;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::scanner::{Scanner, Token, TokenType};
 
 struct Compiler<'a> {
-    scanner: Scanner,
-    chunk: Box<&'a Chunk>,
+    chunk: Option<Chunk>,
     current: Option<Token<'a>>,
     previous: Option<Token<'a>>,
 }
 
-pub fn compile<S: AsRef<str>>(source: S, chunk: &mut Chunk) -> Result<()> {
+pub fn compile<S: AsRef<str>>(source: S) -> Result<Chunk> {
     let source = source.as_ref().to_string();
-    let scanner = Scanner::new(source);
-    let mut compiler = Compiler::new(scanner, chunk);
+    let mut scanner = Scanner::new(source);
+    let mut compiler = Compiler::new();
 
-    compiler.advance()?;
+    compiler.advance(&mut scanner);
     compiler.expression()?;
     compiler.consume_eof()?;
 
-    Ok(())
+    compiler.chunk.take().ok_or(Error::MissingChunkError)
 }
 
 impl<'a> Compiler<'a> {
-    fn new(scanner: Scanner, chunk: &'a Chunk) -> Self {
-        let chunk = Box::new(chunk);
+    fn new() -> Self {
         Self {
-            scanner,
-            chunk,
+            chunk: None,
             current: None,
             previous: None,
         }
     }
 
-    fn advance(&mut self) -> Result<()> {
+    fn advance(&'a mut self, scanner: &'a mut Scanner) {
         self.previous = self.current.take();
-
-        loop {
-            let current = self.scanner.scan_token();
-            if let Ok(token) = current {
-                self.current = Some(token);
-                return Ok(());
-            }
-            error_at_current(self.scanner.current, self.current.as_ref().unwrap().token);
-        }
+        self.current = scanner.scan_to_next();
     }
 
     fn expression(&mut self) -> Result<()> {
-        self.scanner.expression()
+        todo!()
     }
 
     fn consume_eof(&self) -> Result<()> {
-        self.scanner
-            .consume(TokenType::EOF, "Expect end of expression.")
+        todo!()
     }
 }
 

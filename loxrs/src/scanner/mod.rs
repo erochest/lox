@@ -1,6 +1,6 @@
-use std::char;
+use std::{char, iter};
 
-use crate::error::Result;
+use crate::error::{Error, Result};
 
 pub struct Scanner {
     input: String,
@@ -57,7 +57,6 @@ pub enum TokenType {
     Var,
     While,
 
-    Error(String),
     EOF,
 }
 
@@ -68,10 +67,6 @@ pub struct Token<'a> {
 }
 
 impl<'a> Token<'a> {
-    fn error(message: String, line: usize) -> Self {
-        Self::new(TokenType::Error(message), "", line)
-    }
-
     fn new(ty: TokenType, token: &'a str, line: usize) -> Self {
         Self { ty, token, line }
     }
@@ -114,30 +109,27 @@ impl<'a> Scanner {
         }
 
         match c {
-            '(' => return Ok(self.make_token(TokenType::LeftParen)),
-            ')' => return Ok(self.make_token(TokenType::RightParen)),
-            '{' => return Ok(self.make_token(TokenType::LeftBrace)),
-            '}' => return Ok(self.make_token(TokenType::RightBrace)),
-            ';' => return Ok(self.make_token(TokenType::Semicolon)),
-            ',' => return Ok(self.make_token(TokenType::Comma)),
-            '.' => return Ok(self.make_token(TokenType::Dot)),
-            '-' => return Ok(self.make_token(TokenType::Minus)),
-            '+' => return Ok(self.make_token(TokenType::Plus)),
-            '/' => return Ok(self.make_token(TokenType::Slash)),
-            '*' => return Ok(self.make_token(TokenType::Star)),
+            '(' => Ok(self.make_token(TokenType::LeftParen)),
+            ')' => Ok(self.make_token(TokenType::RightParen)),
+            '{' => Ok(self.make_token(TokenType::LeftBrace)),
+            '}' => Ok(self.make_token(TokenType::RightBrace)),
+            ';' => Ok(self.make_token(TokenType::Semicolon)),
+            ',' => Ok(self.make_token(TokenType::Comma)),
+            '.' => Ok(self.make_token(TokenType::Dot)),
+            '-' => Ok(self.make_token(TokenType::Minus)),
+            '+' => Ok(self.make_token(TokenType::Plus)),
+            '/' => Ok(self.make_token(TokenType::Slash)),
+            '*' => Ok(self.make_token(TokenType::Star)),
 
-            '!' => return self.match_second("=", TokenType::BangEqual, TokenType::Bang),
-            '=' => return self.match_second("=", TokenType::EqualEqual, TokenType::Equal),
-            '<' => return self.match_second("=", TokenType::LessEqual, TokenType::Less),
-            '>' => return self.match_second("=", TokenType::GreaterEqual, TokenType::Greater),
+            '!' => self.match_second("=", TokenType::BangEqual, TokenType::Bang),
+            '=' => self.match_second("=", TokenType::EqualEqual, TokenType::Equal),
+            '<' => self.match_second("=", TokenType::LessEqual, TokenType::Less),
+            '>' => self.match_second("=", TokenType::GreaterEqual, TokenType::Greater),
 
-            '"' => return self.string(),
+            '"' => self.string(),
 
-            _ => {}
+            c => Err(self.error_token(c, self.line)),
         }
-
-        // TODO: Make this an Err(Error).
-        Ok(self.error_token("Unexpected character.".to_string()))
     }
 
     fn skip_whitespace(&mut self) {
@@ -177,6 +169,7 @@ impl<'a> Scanner {
 
     pub fn advance(&mut self) -> char {
         self.current += 1;
+        // TODO: handle if a character is encoded as more than one byte.
         self.input[self.current - 1..self.current]
             .chars()
             .next()
@@ -216,7 +209,7 @@ impl<'a> Scanner {
         }
 
         if self.is_at_end() {
-            return Ok(self.error_token("Unterminated string.".to_string()));
+            return Err(self.error_token('"', self.line));
         }
 
         self.advance();
@@ -231,8 +224,8 @@ impl<'a> Scanner {
         Token::new(ty, &self.input[self.start..self.current], self.line)
     }
 
-    fn error_token(&self, message: String) -> Token {
-        Token::error(message, self.line)
+    fn error_token(&self, c: char, line_no: usize) -> Error {
+        Error::ScanError(c, line_no)
     }
 
     fn number(&'a mut self) -> Result<Token<'a>> {
@@ -312,4 +305,22 @@ impl<'a> Scanner {
     pub(crate) fn consume(&self, eof: TokenType, arg: &str) -> Result<()> {
         todo!()
     }
+
+    pub fn scan_to_next(&'a mut self) -> Option<Token<'a>> {
+        iter::repeat_with(move || self.scan_token())
+            .filter_map(|token| match token {
+                Err(ref err) => {
+                    if let Error::ScanError(c, line_no) = err {
+                        error_at_current(*line_no, &c.to_string());
+                    }
+                    None
+                }
+                Ok(token) => Some(token),
+            })
+            .next()
+    }
+}
+
+fn error_at_current(pos: usize, token: &str) -> Result<()> {
+    todo!()
 }
