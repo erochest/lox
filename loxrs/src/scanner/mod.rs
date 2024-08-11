@@ -5,7 +5,7 @@ use crate::error::Result;
 pub struct Scanner {
     input: String,
     start: usize,
-    current: usize,
+    pub current: usize,
     line: usize,
 }
 
@@ -175,7 +175,7 @@ impl<'a> Scanner {
             .unwrap_or('\0')
     }
 
-    fn advance(&mut self) -> char {
+    pub fn advance(&mut self) -> char {
         self.current += 1;
         self.input[self.current - 1..self.current]
             .chars()
@@ -303,5 +303,13 @@ impl<'a> Scanner {
         } else {
             TokenType::Identifier
         }
+    }
+
+    pub(crate) fn expression(&self) -> Result<()> {
+        todo!()
+    }
+
+    pub(crate) fn consume(&self, eof: TokenType, arg: &str) -> Result<()> {
+        todo!()
     }
 }
