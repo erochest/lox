@@ -32,6 +32,7 @@ impl TryFrom<u8> for OpCode {
 
 // create a struct to represent a chunk of bytecode
 pub struct Chunk {
+    pub ip: usize,
     // store the bytecode in a vector
     pub code: Vec<u8>,
     pub constants: Vec<Value>,
@@ -42,6 +43,7 @@ pub struct Chunk {
 impl Chunk {
     pub fn new() -> Chunk {
         Chunk {
+            ip: 0,
             code: Vec::new(),
             constants: Vec::new(),
             lines: Vec::new(),
@@ -62,6 +64,23 @@ impl Chunk {
     /// Get the byte at the given index
     pub fn get(&self, index: usize) -> u8 {
         self.code[index]
+    }
+
+    #[inline]
+    pub fn read_op_code(&mut self) -> u8 {
+        self.ip += 1;
+        self.code[self.ip - 1]
+    }
+
+    #[inline]
+    pub fn read_constant(&mut self) -> f64 {
+        let constant = self.read_op_code();
+        self.constants[constant as usize]
+    }
+
+    #[inline]
+    pub fn at_end(&self) -> bool {
+        self.ip >= self.code.len()
     }
 }
 
