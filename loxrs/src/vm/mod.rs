@@ -40,8 +40,7 @@ impl VM {
     }
 
     pub fn interpret<S: AsRef<str>>(&mut self, source: S) -> Result<()> {
-        let mut chunk = Chunk::new();
-        compiler::compile(source.as_ref(), &mut chunk)?;
+        let mut chunk = compiler::compile(source.as_ref())?;
         self.run(&mut chunk)
     }
 

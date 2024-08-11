@@ -1,15 +1,11 @@
-use std::borrow::BorrowMut;
-use std::cell::RefCell;
-use std::iter;
-
 use crate::chunk::Chunk;
 use crate::error::{Error, Result};
-use crate::scanner::{Scanner, Token, TokenType};
+use crate::scanner::{Scanner, Token};
 
-struct Compiler<'a> {
+struct Compiler {
     chunk: Option<Chunk>,
-    current: Option<Token<'a>>,
-    previous: Option<Token<'a>>,
+    current: Option<Token>,
+    previous: Option<Token>,
 }
 
 pub fn compile<S: AsRef<str>>(source: S) -> Result<Chunk> {
@@ -24,7 +20,7 @@ pub fn compile<S: AsRef<str>>(source: S) -> Result<Chunk> {
     compiler.chunk.take().ok_or(Error::MissingChunkError)
 }
 
-impl<'a> Compiler<'a> {
+impl Compiler {
     fn new() -> Self {
         Self {
             chunk: None,
@@ -33,7 +29,7 @@ impl<'a> Compiler<'a> {
         }
     }
 
-    fn advance(&'a mut self, scanner: &'a mut Scanner) {
+    fn advance(&mut self, scanner: &mut Scanner) {
         self.previous = self.current.take();
         self.current = scanner.scan_to_next();
     }
@@ -45,8 +41,4 @@ impl<'a> Compiler<'a> {
     fn consume_eof(&self) -> Result<()> {
         todo!()
     }
-}
-
-fn error_at_current(pos: usize, token: &str) -> Result<()> {
-    todo!()
 }

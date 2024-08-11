@@ -60,15 +60,25 @@ pub enum TokenType {
     EOF,
 }
 
-pub struct Token<'a> {
+pub struct Token {
     pub ty: TokenType,
-    pub token: &'a str,
+    pub offset: usize,
+    pub length: usize,
     pub line: usize,
 }
 
-impl<'a> Token<'a> {
-    fn new(ty: TokenType, token: &'a str, line: usize) -> Self {
-        Self { ty, token, line }
+impl Token {
+    fn new(ty: TokenType, offset: usize, length: usize, line: usize) -> Self {
+        Self {
+            ty,
+            offset,
+            length,
+            line,
+        }
+    }
+
+    pub fn token<'a>(&self, input: &'a str) -> &'a str {
+        todo!()
     }
 }
 
@@ -91,7 +101,7 @@ impl<'a> Scanner {
         }
     }
 
-    pub fn scan_token(&'a mut self) -> Result<Token<'a>> {
+    pub fn scan_token(&mut self) -> Result<Token> {
         self.skip_whitespace();
 
         self.start = self.current;
@@ -200,7 +210,7 @@ impl<'a> Scanner {
         true
     }
 
-    fn string(&'a mut self) -> Result<Token<'a>> {
+    fn string(&mut self) -> Result<Token> {
         while self.peek() != '"' && !self.is_at_end() {
             if self.peek() == '\n' {
                 self.line += 1;
@@ -221,14 +231,14 @@ impl<'a> Scanner {
     }
 
     fn make_token(&self, ty: TokenType) -> Token {
-        Token::new(ty, &self.input[self.start..self.current], self.line)
+        Token::new(ty, self.start, self.current, self.line)
     }
 
     fn error_token(&self, c: char, line_no: usize) -> Error {
         Error::ScanError(c, line_no)
     }
 
-    fn number(&'a mut self) -> Result<Token<'a>> {
+    fn number(&mut self) -> Result<Token> {
         while self.peek().is_ascii_digit() {
             self.advance();
         }
@@ -243,7 +253,7 @@ impl<'a> Scanner {
         Ok(self.make_token(TokenType::Number))
     }
 
-    fn identifier(&'a mut self) -> Result<Token<'a>> {
+    fn identifier(&mut self) -> Result<Token> {
         while self.peek().is_ascii_alphanumeric() || self.peek() == '_' {
             self.advance();
         }
@@ -298,15 +308,7 @@ impl<'a> Scanner {
         }
     }
 
-    pub(crate) fn expression(&self) -> Result<()> {
-        todo!()
-    }
-
-    pub(crate) fn consume(&self, eof: TokenType, arg: &str) -> Result<()> {
-        todo!()
-    }
-
-    pub fn scan_to_next(&'a mut self) -> Option<Token<'a>> {
+    pub fn scan_to_next(&mut self) -> Option<Token> {
         iter::repeat_with(move || self.scan_token())
             .filter_map(|token| match token {
                 Err(ref err) => {
@@ -321,6 +323,6 @@ impl<'a> Scanner {
     }
 }
 
-fn error_at_current(pos: usize, token: &str) -> Result<()> {
+fn error_at_current(pos: usize, token: &str) {
     todo!()
 }
